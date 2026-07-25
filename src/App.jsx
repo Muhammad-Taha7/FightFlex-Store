@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCurrentUser } from './store/authSlice';
+import SplashLoader from './Components/SplashLoader';
 
 // Navbar Component
 import { Navbar } from './Client/Components/Navbar';
@@ -46,6 +47,13 @@ const App = () => {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
 
+  // Show splash on every page load/reload
+  const [showSplash, setShowSplash] = useState(true);
+
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+  };
+
   useEffect(() => {
     if (token) {
       dispatch(fetchCurrentUser());
@@ -53,7 +61,9 @@ const App = () => {
   }, [dispatch, token]);
 
   return (
-    <Routes>
+    <>
+      {showSplash && <SplashLoader onFinish={handleSplashFinish} />}
+      <Routes>
       {/* Auth / Login Routes WITHOUT Navbar */}
       <Route path="/client-login" element={<ClientLoginPage />} />
       <Route path="/signup" element={<AuthPage />} />
@@ -100,6 +110,7 @@ const App = () => {
       {/* Fallback to Home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 };
 

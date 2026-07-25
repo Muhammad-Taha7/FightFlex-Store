@@ -1,27 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { TrendingUp, ShoppingBag, Loader2, Package, CheckCircle, XCircle, DollarSign, BarChart3, ArrowUpRight, Clock } from 'lucide-react';
+import { 
+    TrendingUp, 
+    ShoppingBag, 
+    Loader2, 
+    CheckCircle2, 
+    Clock, 
+    DollarSign, 
+    BarChart3, 
+    AlertCircle,
+    ArrowUpRight
+} from 'lucide-react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-    PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, Legend 
+    PieChart, Pie, Cell, AreaChart, Area, LineChart, Line 
 } from 'recharts';
 
-const COLORS = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444'];
-const STATUS_COLORS = { pending: '#f59e0b', dispatched: '#3b82f6', cleared: '#10b981', cancelled: '#ef4444' };
+// Theme Constants
+const STATUS_CONFIG = {
+    pending: { color: '#f59e0b', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-800' },
+    dispatched: { color: '#3b82f6', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-800' },
+    cleared: { color: '#10b981', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-800' },
+    cancelled: { color: '#ef4444', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', badge: 'bg-rose-100 text-rose-800' }
+};
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-lg">
-                <p className="text-sm font-bold text-gray-900 mb-1">{label}</p>
+            <div className="bg-slate-900 text-white rounded-xl p-3 shadow-xl border border-slate-800 text-xs">
+                <p className="font-semibold text-slate-300 mb-1.5">{label}</p>
                 {payload.map((entry, idx) => (
-                    <p key={idx} className="text-xs text-gray-600">
-                        <span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: entry.color }}></span>
-                        {entry.name}: <span className="font-bold text-gray-900">
-                            {entry.name.toLowerCase().includes('revenue') ? `Rs ${entry.value.toLocaleString()}` : entry.value}
+                    <div key={idx} className="flex items-center gap-2 my-0.5">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                        <span className="text-slate-400 capitalize">{entry.name}:</span>
+                        <span className="font-bold text-white">
+                            {entry.name.toLowerCase().includes('revenue') 
+                                ? `Rs ${Number(entry.value).toLocaleString()}` 
+                                : entry.value.toLocaleString()}
                         </span>
-                    </p>
+                    </div>
                 ))}
             </div>
         );
@@ -29,43 +47,61 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-const DashboardOverview = ({ user }) => {
-    const { token } = useSelector(state => state.auth);
+const DashboardOverview = () => {
+    const { token } = useSelector((state) => state.auth);
     const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
+        let isMounted = true;
         const fetchAnalytics = async () => {
             try {
+                setError(null);
                 const config = { headers: { Authorization: `Bearer ${token}` } };
                 const res = await axios.get('http://localhost:5000/api/orders/analytics', config);
-                setAnalytics(res.data);
-            } catch (error) {
-                console.error("Error fetching analytics", error);
+                if (isMounted) setAnalytics(res.data);
+            } catch (err) {
+                if (isMounted) {
+                    console.error("Error fetching analytics", err);
+                    setError("Failed to load dashboard data. Please try again later.");
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
-        fetchAnalytics();
+
+        if (token) fetchAnalytics();
+        return () => { isMounted = false; };
     }, [token]);
 
     if (loading) {
         return (
             <div className="flex h-[60vh] items-center justify-center">
                 <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin text-gray-800 mx-auto mb-4" />
-                    <p className="text-gray-500 font-medium">Loading analytics...</p>
+                    <Loader2 className="w-10 h-10 animate-spin text-blue-600 mx-auto mb-3" />
+                    <p className="text-slate-500 text-sm font-medium">Gathering real-time analytics...</p>
                 </div>
             </div>
         );
     }
 
+    if (error) {
+        return (
+            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center max-w-lg mx-auto my-12">
+                <AlertCircle className="w-10 h-10 text-rose-500 mx-auto mb-3" />
+                <h3 className="text-rose-900 font-bold text-lg mb-1">Analytics Unavailable</h3>
+                <p className="text-rose-600 text-sm">{error}</p>
+            </div>
+        );
+    }
+
     const pieData = [
-        { name: 'Pending', value: analytics?.pendingOrders || 0 },
-        { name: 'Dispatched', value: analytics?.dispatchedOrders || 0 },
-        { name: 'Cleared', value: analytics?.clearedOrders || 0 },
-        { name: 'Cancelled', value: analytics?.cancelledOrders || 0 }
-    ].filter(data => data.value > 0);
+        { name: 'Pending', value: analytics?.pendingOrders || 0, statusKey: 'pending' },
+        { name: 'Dispatched', value: analytics?.dispatchedOrders || 0, statusKey: 'dispatched' },
+        { name: 'Cleared', value: analytics?.clearedOrders || 0, statusKey: 'cleared' },
+        { name: 'Cancelled', value: analytics?.cancelledOrders || 0, statusKey: 'cancelled' }
+    ].filter(d => d.value > 0);
 
     const monthlyData = analytics?.monthlyRevenue || [];
     const dailyData = analytics?.dailyOrders || [];
@@ -75,176 +111,175 @@ const DashboardOverview = ({ user }) => {
             title: 'Total Revenue',
             value: `Rs ${(analytics?.totalRevenue || 0).toLocaleString()}`,
             icon: DollarSign,
-            color: 'emerald',
-            bgClass: 'bg-emerald-50 border-emerald-200',
-            iconClass: 'text-emerald-500',
-            valueClass: 'text-emerald-700'
+            style: STATUS_CONFIG.cleared
         },
         {
             title: 'Total Orders',
-            value: analytics?.totalOrders || 0,
+            value: (analytics?.totalOrders || 0).toLocaleString(),
             icon: ShoppingBag,
-            color: 'blue',
-            bgClass: 'bg-gray-50 border-gray-200',
-            iconClass: 'text-gray-800',
-            valueClass: 'text-black'
+            style: STATUS_CONFIG.dispatched
         },
         {
             title: 'Cleared Orders',
-            value: analytics?.clearedOrders || 0,
-            icon: CheckCircle,
-            color: 'emerald',
-            bgClass: 'bg-emerald-50 border-emerald-200',
-            iconClass: 'text-emerald-500',
-            valueClass: 'text-emerald-700'
+            value: (analytics?.clearedOrders || 0).toLocaleString(),
+            icon: CheckCircle2,
+            style: STATUS_CONFIG.cleared
         },
         {
             title: 'Pending Orders',
-            value: analytics?.pendingOrders || 0,
+            value: (analytics?.pendingOrders || 0).toLocaleString(),
             icon: Clock,
-            color: 'amber',
-            bgClass: 'bg-amber-50 border-amber-200',
-            iconClass: 'text-amber-500',
-            valueClass: 'text-amber-700'
+            style: STATUS_CONFIG.pending
         }
     ];
 
     return (
         <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* KPI Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {statCards.map((card, idx) => {
                     const Icon = card.icon;
                     return (
-                        <div key={idx} className={`${card.bgClass} border rounded-2xl p-5 relative overflow-hidden`}>
-                            <div className="absolute top-3 right-3 opacity-10">
-                                <Icon className={`w-16 h-16 ${card.iconClass}`} />
-                            </div>
-                            <div className="relative z-10">
-                                <div className={`w-10 h-10 ${card.bgClass} rounded-xl flex items-center justify-center mb-3`}>
-                                    <Icon className={`w-5 h-5 ${card.iconClass}`} />
+                        <div 
+                            key={idx} 
+                            className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
+                        >
+                            <div className="flex items-center justify-between mb-3">
+                                <div className={`p-2.5 rounded-xl ${card.style.bg}`}>
+                                    <Icon className={`w-5 h-5 ${card.style.text}`} />
                                 </div>
-                                <p className="text-gray-600 font-medium text-sm mb-1">{card.title}</p>
-                                <h3 className={`text-2xl font-black ${card.valueClass}`}>{card.value}</h3>
+                                <span className="text-slate-400 hover:text-slate-600 cursor-pointer transition-colors">
+                                    <ArrowUpRight className="w-4 h-4" />
+                                </span>
+                            </div>
+                            <div>
+                                <p className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">{card.title}</p>
+                                <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{card.value}</h3>
                             </div>
                         </div>
                     );
                 })}
             </div>
 
-            {/* Charts Row 1: Revenue Line Chart + Daily Bar */}
+            {/* Charts Row 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Monthly Revenue Area Chart */}
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                {/* Monthly Revenue Chart */}
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">Monthly Revenue</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Last 6 months breakdown</p>
+                            <h3 className="text-base font-bold text-slate-900">Monthly Revenue</h3>
+                            <p className="text-xs text-slate-400 mt-0.5">Historical revenue breakdown</p>
                         </div>
-                        <div className="p-2 bg-gray-50 rounded-lg">
-                            <TrendingUp className="w-5 h-5 text-gray-800" />
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <TrendingUp className="w-4 h-4" />
                         </div>
                     </div>
-                    <div className="h-[280px] w-full">
+                    <div className="h-[260px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={monthlyData}>
+                            <AreaChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15}/>
+                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25}/>
                                         <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} />
-                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#3b82f6" fill="url(#revenueGradient)" strokeWidth={2.5} dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }} />
+                                <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#3b82f6" fill="url(#revenueGradient)" strokeWidth={2.5} dot={{ r: 3, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
                 {/* Daily Orders Bar Chart */}
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">Daily Orders</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Last 7 days activity</p>
+                            <h3 className="text-base font-bold text-slate-900">Daily Orders</h3>
+                            <p className="text-xs text-slate-400 mt-0.5">Order volume for the last 7 days</p>
                         </div>
-                        <div className="p-2 bg-emerald-50 rounded-lg">
-                            <BarChart3 className="w-5 h-5 text-emerald-500" />
+                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <BarChart3 className="w-4 h-4" />
                         </div>
                     </div>
-                    <div className="h-[280px] w-full">
+                    <div className="h-[260px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={dailyData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} />
-                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} allowDecimals={false} />
+                            <BarChart data={dailyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Bar dataKey="orders" name="Orders" fill="#10b981" radius={[6, 6, 0, 0]} barSize={32} />
+                                <Bar dataKey="orders" name="Orders" fill="#10b981" radius={[6, 6, 0, 0]} barSize={24} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
             </div>
 
-            {/* Charts Row 2: Status Pie + Monthly Orders Line */}
+            {/* Charts Row 2 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Order Status Distribution */}
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
+                {/* Status Pie Chart */}
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">Order Status</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Distribution breakdown</p>
+                            <h3 className="text-base font-bold text-slate-900">Order Distribution</h3>
+                            <p className="text-xs text-slate-400 mt-0.5">Breakdown by current order status</p>
                         </div>
                     </div>
-                    <div className="h-[280px] w-full flex items-center justify-center">
+                    <div className="h-[220px] w-full relative">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={pieData}
                                     cx="50%"
                                     cy="50%"
-                                    innerRadius={75}
-                                    outerRadius={105}
-                                    paddingAngle={5}
+                                    innerRadius={65}
+                                    outerRadius={90}
+                                    paddingAngle={4}
                                     dataKey="value"
                                     stroke="none"
                                 >
-                                    {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    {pieData.map((entry) => (
+                                        <Cell key={entry.name} fill={STATUS_CONFIG[entry.statusKey]?.color || '#94a3b8'} />
                                     ))}
                                 </Pie>
                                 <Tooltip content={<CustomTooltip />} />
                             </PieChart>
                         </ResponsiveContainer>
+                        {/* Center Total Count */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span className="text-2xl font-bold text-slate-900">{analytics?.totalOrders || 0}</span>
+                            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Total</span>
+                        </div>
                     </div>
-                    <div className="flex justify-center gap-6 mt-2">
-                        {pieData.map((entry, index) => (
+                    {/* Dynamic Legend */}
+                    <div className="flex flex-wrap justify-center gap-4 mt-2 pt-4 border-t border-slate-50">
+                        {pieData.map((entry) => (
                             <div key={entry.name} className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }}></span>
-                                <span className="text-sm text-gray-600 font-medium">{entry.name}</span>
-                                <span className="text-sm font-bold text-gray-900">{entry.value}</span>
+                                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: STATUS_CONFIG[entry.statusKey]?.color }} />
+                                <span className="text-xs text-slate-500 font-medium">{entry.name}:</span>
+                                <span className="text-xs font-bold text-slate-900">{entry.value}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Monthly Orders + Revenue Mixed Line Chart */}
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                {/* Monthly Volume Line Chart */}
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">Monthly Overview</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Orders count per month</p>
+                            <h3 className="text-base font-bold text-slate-900">Monthly Order Trends</h3>
+                            <p className="text-xs text-slate-400 mt-0.5">Volume trajectory month over month</p>
                         </div>
                     </div>
-                    <div className="h-[280px] w-full">
+                    <div className="h-[260px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={monthlyData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} />
-                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} allowDecimals={false} />
+                            <LineChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Line type="monotone" dataKey="orders" name="Orders" stroke="#8b5cf6" strokeWidth={2.5} dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }} />
                             </LineChart>
@@ -253,47 +288,50 @@ const DashboardOverview = ({ user }) => {
                 </div>
             </div>
 
-            {/* Recent Orders */}
-            {analytics?.recentOrders?.length > 0 && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-900">Recent Orders</h3>
-                        <span className="text-xs text-gray-400 font-medium">Last 5 orders</span>
+            {/* Recent Orders Table */}
+            {analytics?.recentOrders && analytics.recentOrders.length > 0 && (
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-5">
+                        <div>
+                            <h3 className="text-base font-bold text-slate-900">Recent Orders</h3>
+                            <p className="text-xs text-slate-400 mt-0.5">Latest transactions processed</p>
+                        </div>
+                        <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+                            Latest {analytics.recentOrders.length}
+                        </span>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead className="text-gray-500 border-b border-gray-100">
-                                <tr>
-                                    <th className="text-left py-3 font-semibold">Order ID</th>
-                                    <th className="text-left py-3 font-semibold">Date</th>
-                                    <th className="text-left py-3 font-semibold">Amount</th>
-                                    <th className="text-left py-3 font-semibold">Status</th>
+                        <table className="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold">
+                                    <th className="pb-3 pl-1">Order Ref</th>
+                                    <th className="pb-3">Date</th>
+                                    <th className="pb-3">Amount</th>
+                                    <th className="pb-3 text-right pr-1">Status</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {analytics.recentOrders.map((order) => (
-                                    <tr key={order._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                                        <td className="py-3 font-mono text-gray-900 font-medium">
-                                            #{order._id.substring(order._id.length - 6).toUpperCase()}
-                                        </td>
-                                        <td className="py-3 text-gray-600">
-                                            {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                        </td>
-                                        <td className="py-3 font-semibold text-gray-900">
-                                            Rs {order.totalPrice?.toLocaleString()}
-                                        </td>
-                                        <td className="py-3">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold capitalize ${
-                                                order.status === 'cleared' ? 'bg-emerald-100 text-emerald-800' :
-                                                order.status === 'dispatched' ? 'bg-gray-100 text-black' :
-                                                order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                                'bg-amber-100 text-amber-800'
-                                            }`}>
-                                                {order.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
+                            <tbody className="divide-y divide-slate-50">
+                                {analytics.recentOrders.map((order) => {
+                                    const statusStyle = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
+                                    return (
+                                        <tr key={order._id} className="hover:bg-slate-50/60 transition-colors">
+                                            <td className="py-3.5 pl-1 font-mono font-medium text-slate-900">
+                                                #{order._id ? order._id.slice(-6).toUpperCase() : 'N/A'}
+                                            </td>
+                                            <td className="py-3.5 text-slate-500">
+                                                {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}
+                                            </td>
+                                            <td className="py-3.5 font-bold text-slate-900">
+                                                Rs {(order.totalPrice || 0).toLocaleString()}
+                                            </td>
+                                            <td className="py-3.5 text-right pr-1">
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full font-bold text-[10px] capitalize ${statusStyle.badge}`}>
+                                                    {order.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

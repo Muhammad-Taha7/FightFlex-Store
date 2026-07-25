@@ -68,7 +68,7 @@ export const Carousel = () => {
   return (
     <div className="relative w-full overflow-hidden group select-none shadow-2xl">
       {/* Slide Container */}
-      <div className="relative h-64 sm:h-96 md:h-[35rem] lg:h-[55rem] w-full">
+      <div className="relative h-[35rem]  md:h-[40rem] lg:h-[60rem] w-full">
         <div
           className="flex h-full w-full transition-transform duration-700 ease-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}

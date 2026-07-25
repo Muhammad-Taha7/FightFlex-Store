@@ -166,10 +166,7 @@ export const Dashboard = () => {
                             )}
                         </div>
                         <div className="h-8 w-px bg-gray-200"></div>
-                        <span className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-bold rounded-full flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            System Live
-                        </span>
+                        
                     </div>
                 </header>
 

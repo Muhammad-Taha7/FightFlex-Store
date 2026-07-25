@@ -402,25 +402,46 @@ export const Navbar = () => {
                 <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2 px-1">
                   {searchQuery.trim() === '' ? 'New Arrivals Suggestions' : `${searchResults.length} result${searchResults.length !== 1 ? 's' : ''} found`}
                 </p>
-                {searchResults.map((product) => (
-                  <button
-                    key={product.id}
-                    className="flex items-center justify-between p-4 rounded-xl cursor-pointer bg-white/5 border border-white/10 text-left w-full hover:bg-gray-900/10 hover:border-gray-800/30 transition-all duration-150"
-                    onClick={() => {
-                      setSearchOpen(false);
-                      setSearchQuery('');
-                      navigate(`/product/${product.id}`);
-                    }}
-                  >
-                    <div>
-                      <p className="text-[0.95rem] font-bold text-white m-0">{product.name}</p>
-                      <p className="text-xs text-gray-400 font-medium mt-0.5">{product.category}</p>
-                    </div>
-                    <p className="text-sm font-extrabold text-gray-400 m-0 flex-shrink-0">
-                      Rs. {product.price.toLocaleString()}
-                    </p>
-                  </button>
-                ))}
+                {searchResults.map((product) => {
+                  const imageUrl = product.images?.[0]?.imageUrl || product.images?.[0] || null;
+                  return (
+                    <button
+                      key={product._id}
+                      className="flex items-center gap-4 p-3 rounded-xl cursor-pointer bg-white/5 border border-white/10 text-left w-full hover:bg-white/10 hover:border-white/20 transition-all duration-150 group"
+                      onClick={() => {
+                        setSearchOpen(false);
+                        setSearchQuery('');
+                        navigate(`/product/${product._id}`);
+                      }}
+                    >
+                      {/* Product Thumbnail */}
+                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-white/5 border border-white/10">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={product.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package size={20} className="text-gray-500" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-white truncate m-0">{product.title}</p>
+                        <p className="text-xs text-gray-400 font-medium mt-0.5">{product.category}</p>
+                      </div>
+
+                      {/* Price */}
+                      <p className="text-sm font-extrabold text-white/80 m-0 flex-shrink-0">
+                        PKR {Number(product.price).toLocaleString()}
+                      </p>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
