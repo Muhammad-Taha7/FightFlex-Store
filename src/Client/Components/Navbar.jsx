@@ -105,7 +105,7 @@ export const Navbar = () => {
         if (!searchQuery.trim()) {
           // Fetch newest products as suggestions if search query is empty
           const res = await axios.get(`http://localhost:5000/api/products`);
-          setSearchResults(res.data.products?.slice(0, 5) || []);
+          setSearchResults(res.data.products?.slice(0, 6) || []);
         } else {
           // Fetch actual search results
           const res = await axios.get(`http://localhost:5000/api/products?search=${searchQuery}`);
@@ -118,7 +118,6 @@ export const Navbar = () => {
       }
     };
     
-    // Only fetch if search overlay is open
     if (searchOpen) {
       const debounce = setTimeout(() => {
         fetchSearch();
@@ -145,8 +144,6 @@ export const Navbar = () => {
 
   const userAvatar = user?.profileImage || 
     `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || 'U')}&background=2563eb&color=ffffff&size=80&bold=true`;
-
-  const shouldBlur = !isHomePage || isScrolled;
 
   return (
     <>
@@ -229,14 +226,12 @@ export const Navbar = () => {
               </button>
             </div>
 
-            {/* FIXED: Yahan Mobile Menu, Search aur Cart buttons add kiye gaye hain */}
+            {/* Mobile Actions */}
             <div className="md:hidden flex items-center gap-1">
-              {/* Mobile Search Button */}
               <button onClick={() => setSearchOpen(true)} className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
                 <Search size={22} />
               </button>
 
-              {/* Mobile Cart Button */}
               <button onClick={() => setCartOpen(true)} className="relative p-2 text-gray-600 hover:text-gray-900">
                 <ShoppingBag size={22} />
                 {cartItemCount > 0 && (
@@ -246,7 +241,6 @@ export const Navbar = () => {
                 )}
               </button>
 
-              {/* Mobile Menu (Hamburger) Button */}
               <button onClick={() => setMobileOpen(true)} className="p-2 text-gray-900 ml-1">
                 <Menu size={24} />
               </button>
@@ -258,13 +252,13 @@ export const Navbar = () => {
 
       {/* MOBILE MENU OVERLAY */}
       <div 
-        className={`fixed inset-0 z-[100] bg-slate-950/95 flex flex-col transition-all duration-300 overflow-y-auto md:hidden ${
+        className={`fixed inset-0 z-[100] bg-black/95 flex flex-col transition-all duration-300 overflow-y-auto md:hidden ${
           mobileOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
       >
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <Link to="/" onClick={() => setMobileOpen(false)} className="flex items-center">
-            <img src="https://i.postimg.cc/5yxd84ZJ/Fight-Flex2-removebg-preview.png" alt="FightFlex" className="h-8 object-contain" style={{ filter: 'brightness(0)' }} />
+            <img src="https://i.postimg.cc/5yxd84ZJ/Fight-Flex2-removebg-preview.png" alt="FightFlex" className="h-8 object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
           </Link>
           <button onClick={() => setMobileOpen(false)} className="p-2 text-gray-300 hover:text-white">
             <X size={24} />
@@ -279,7 +273,7 @@ export const Navbar = () => {
                 key={link.label}
                 to={link.to}
                 className={`block px-4 py-3 rounded-xl font-bold transition-all ${
-                  isActive ? 'bg-gray-900/20 text-gray-400 border border-gray-800/30' : 'text-gray-300 hover:text-white hover:bg-white/5 border border-transparent'
+                  isActive ? 'bg-white/10 text-white border border-white/20' : 'text-gray-300 hover:text-white hover:bg-white/5 border border-transparent'
                 }`}
                 onClick={() => setMobileOpen(false)}
               >
@@ -330,7 +324,7 @@ export const Navbar = () => {
           ) : (
             <Link
               to="/client-login"
-              className="flex items-center gap-3 py-3 px-4 text-gray-400 font-bold text-[0.95rem] no-underline rounded-xl hover:bg-gray-800/10 border border-gray-800/20"
+              className="flex items-center gap-3 py-3 px-4 text-gray-300 font-bold text-[0.95rem] no-underline rounded-xl hover:bg-white/5 border border-white/10"
               onClick={() => setMobileOpen(false)}
             >
               <User size={18} /> Login / Sign Up
@@ -339,40 +333,46 @@ export const Navbar = () => {
         </div>
       </div>
 
-      {/* SEARCH OVERLAY */}
+      {/* ── SEARCH OVERLAY (FULL WIDTH MOBILE & COMPACT COMPONENT) ── */}
       <div
-        className={`fixed inset-0 z-[100] bg-slate-950/95 flex flex-col items-center transition-all duration-300 overflow-y-auto ${
+        className={`fixed inset-0 z-[100] bg-black flex flex-col items-center transition-all duration-300 overflow-y-auto ${
           searchOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
       >
         <div
-          className={`w-full max-w-xl px-5 pt-12 pb-6 transition-transform duration-300 ${
-            searchOpen ? 'translate-y-0' : '-translate-y-10'
+          className={`w-full max-w-4xl px-3 sm:px-6 pt-6 sm:pt-10 pb-12 transition-transform duration-300 ${
+            searchOpen ? 'translate-y-0' : '-translate-y-8'
           }`}
         >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-white m-0">Search Products</h2>
+          {/* Top Bar Header */}
+          <div className="flex items-center justify-between mb-4 sm:mb-8 pb-3 border-b border-white/10">
+            <div>
+              <h2 className="text-lg sm:text-2xl font-black text-white uppercase tracking-wider m-0">Search Catalog</h2>
+              <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 font-mono">Find your favorite FightFlex gear</p>
+            </div>
             <button
               onClick={() => {
                 setSearchOpen(false);
                 setSearchQuery('');
                 setSearchResults([]);
               }}
-              className="bg-white/10 border border-white/10 text-gray-300 p-2 rounded-xl cursor-pointer hover:bg-white/20 hover:text-white transition-colors duration-200 flex items-center"
+              className="bg-white/10 border border-white/20 text-white p-2 rounded-full cursor-pointer hover:bg-white hover:text-black transition-all duration-200 flex items-center justify-center"
+              aria-label="Close search"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 mb-5 focus-within:border-gray-800 focus-within:ring-2 focus-within:ring-gray-800/20 transition-all">
-            <Search size={20} className="text-gray-400 flex-shrink-0" />
+          {/* Search Input Box */}
+          <div className="flex items-center gap-2.5 bg-white/5 border border-white/20 rounded-xl sm:rounded-2xl px-3.5 sm:px-5 py-3 sm:py-4 mb-5 sm:mb-8 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition-all shadow-2xl">
+            <Search size={18} className="text-gray-400 flex-shrink-0 sm:w-5 sm:h-5" />
             <input
               ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for gloves, shorts, nutrition..."
-              className="flex-1 bg-transparent border-none outline-none text-white text-base placeholder-gray-500 font-medium"
+              placeholder="Search products..."
+              className="flex-1 bg-transparent border-none outline-none text-white text-sm sm:text-lg placeholder-gray-500 font-medium tracking-wide"
             />
             {searchQuery && (
               <button
@@ -387,61 +387,92 @@ export const Navbar = () => {
             )}
           </div>
 
-          <div className="min-h-[200px]">
+          {/* Results / Suggestions Container */}
+          <div className="min-h-[250px]">
             {isSearching ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <p className="text-gray-400 font-medium">Searching...</p>
+                <div className="w-7 h-7 border-2 border-white/20 border-t-white rounded-full animate-spin mb-3" />
+                <p className="text-gray-400 font-mono text-xs sm:text-sm">Searching inventory...</p>
               </div>
             ) : searchResults.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <p className="text-white text-lg font-bold">No results found</p>
-                <p className="text-gray-400 text-sm mt-1">Try a different keyword</p>
+              <div className="flex flex-col items-center justify-center py-14 text-center border border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
+                <Package size={38} className="text-gray-600 mb-2 stroke-[1.5]" />
+                <p className="text-white text-base font-bold">No products found</p>
+                <p className="text-gray-400 text-xs mt-1">Try searching with a different keyword</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-1">
-                <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2 px-1">
-                  {searchQuery.trim() === '' ? 'New Arrivals Suggestions' : `${searchResults.length} result${searchResults.length !== 1 ? 's' : ''} found`}
-                </p>
-                {searchResults.map((product) => {
-                  const imageUrl = product.images?.[0]?.imageUrl || product.images?.[0] || null;
-                  return (
-                    <button
-                      key={product._id}
-                      className="flex items-center gap-4 p-3 rounded-xl cursor-pointer bg-white/5 border border-white/10 text-left w-full hover:bg-white/10 hover:border-white/20 transition-all duration-150 group"
-                      onClick={() => {
-                        setSearchOpen(false);
-                        setSearchQuery('');
-                        navigate(`/product/${product._id}`);
-                      }}
-                    >
-                      {/* Product Thumbnail */}
-                      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-white/5 border border-white/10">
-                        {imageUrl ? (
-                          <img
-                            src={imageUrl}
-                            alt={product.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Package size={20} className="text-gray-500" />
+              <div>
+                {/* Result Section Title */}
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-gray-400">
+                    {searchQuery.trim() === '' ? ' Suggested Products' : `Search Results (${searchResults.length})`}
+                  </span>
+                  {searchQuery.trim() === '' && (
+                    <span className="text-[9px] sm:text-[10px] bg-white/10 text-gray-300 px-2 py-0.5 rounded font-mono uppercase">
+                      New
+                    </span>
+                  )}
+                </div>
+
+                {/* Compact Grid for Mobile (2 Columns) */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4">
+                  {searchResults.map((product) => {
+                    const imageUrl = product.images?.[0]?.imageUrl || product.images?.[0] || null;
+                    return (
+                      <button
+                        key={product._id}
+                        className="group flex flex-col bg-white/[0.03] border border-white/10 rounded-xl sm:rounded-2xl overflow-hidden text-left cursor-pointer hover:bg-white/[0.08] hover:border-white/30 transition-all duration-300"
+                        onClick={() => {
+                          setSearchOpen(false);
+                          setSearchQuery('');
+                          navigate(`/product/${product._id}`);
+                        }}
+                      >
+                        {/* Image Container - Scaled down on Mobile */}
+                        <div className="w-full h-28 sm:h-44 bg-neutral-900 overflow-hidden relative border-b border-white/10 flex items-center justify-center">
+                          {imageUrl ? (
+                            <img
+                              src={imageUrl}
+                              alt={product.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-gray-600 gap-1">
+                              <Package size={22} />
+                              <span className="text-[10px] font-mono">No Image</span>
+                            </div>
+                          )}
+                          {product.category && (
+                            <span className="absolute top-2 left-2 bg-black/70 backdrop-blur-md text-white text-[8px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded border border-white/10">
+                              {product.category}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Card Details - Compact Padding */}
+                        <div className="p-2.5 sm:p-4 flex flex-col flex-1 justify-between gap-2">
+                          <div>
+                            <h3 className="text-xs sm:text-base font-bold sm:font-extrabold text-white truncate m-0 group-hover:text-gray-200 transition-colors">
+                              {product.title}
+                            </h3>
+                            {product.description && (
+                              <p className="text-[10px] sm:text-xs text-gray-400 line-clamp-1 mt-0.5 font-normal">
+                                {product.description}
+                              </p>
+                            )}
                           </div>
-                        )}
-                      </div>
 
-                      {/* Product Info */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-white truncate m-0">{product.title}</p>
-                        <p className="text-xs text-gray-400 font-medium mt-0.5">{product.category}</p>
-                      </div>
-
-                      {/* Price */}
-                      <p className="text-sm font-extrabold text-white/80 m-0 flex-shrink-0">
-                        PKR {Number(product.price).toLocaleString()}
-                      </p>
-                    </button>
-                  );
-                })}
+                          <div className="flex items-center justify-between pt-1.5 border-t border-white/5">
+                            <span className="text-[10px] sm:text-xs text-gray-400 font-mono">PKR</span>
+                            <span className="text-xs sm:text-base font-black text-white font-mono">
+                              {Number(product.price).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -453,3 +484,5 @@ export const Navbar = () => {
     </>
   );
 };
+
+export default Navbar;

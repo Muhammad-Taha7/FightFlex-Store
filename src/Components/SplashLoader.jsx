@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 /**
  * FightFlex SplashLoader
- * - Enlarged Logo, Brand, and Tagline fonts
- * - Increased display duration for better visual impact
- * - Smooth split transitions on exit
+ * - Cleaned layout (no visible section divider lines)
+ * - Optimized fast duration (~1s display + 0.5s exit transition)
  */
 
 const SplashLoader = ({ onFinish }) => {
@@ -12,12 +11,12 @@ const SplashLoader = ({ onFinish }) => {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    // Increased duration: Hold splash for ~4 seconds before exit sequence starts
-    const t1 = setTimeout(() => setExiting(true), 4000);
+    // Hold splash for 1.0 second then trigger smooth exit transition
+    const t1 = setTimeout(() => setExiting(true), 1000);
     const t2 = setTimeout(() => {
       setDone(true);
       onFinish?.();
-    }, 4800); // 4000ms hold + 800ms slide-out animation
+    }, 1500); // Total 1.5s (1000ms hold + 500ms exit)
 
     return () => { 
       clearTimeout(t1); 
@@ -34,12 +33,12 @@ const SplashLoader = ({ onFinish }) => {
       {/* Keyframe definitions */}
       <style>{`
         @keyframes ff-logo {
-          0%   { opacity: 0; transform: scale(0.8) translateY(20px); }
+          0%   { opacity: 0; transform: scale(0.8) translateY(12px); }
           100% { opacity: 1; transform: scale(1)   translateY(0);    }
         }
         @keyframes ff-text {
-          0%   { opacity: 0; transform: translateY(12px); }
-          100% { opacity: 1; transform: translateY(0);    }
+          0%   { opacity: 0; transform: translateY(8px); }
+          100% { opacity: 1; transform: translateY(0);   }
         }
         @keyframes ff-bar {
           0%   { width: 0%; }
@@ -67,9 +66,10 @@ const SplashLoader = ({ onFinish }) => {
           zIndex: 99999,
           overflow: 'hidden',
           pointerEvents: 'all',
+          background: '#000',
         }}
       >
-        {/* ── TOP SECTION (slides UP on exit) ── */}
+        {/* ── TOP SECTION ── */}
         <div
           style={{
             position: 'absolute',
@@ -77,9 +77,9 @@ const SplashLoader = ({ onFinish }) => {
             left: 0,
             width: '100%',
             height: '33.334%',
-            background: 'linear-gradient(180deg, #0d0d0d 0%, #050505 100%)',
+            background: '#000',
             animation: exiting
-              ? `ff-slide-up 0.75s ${easePower} forwards`
+              ? `ff-slide-up 0.5s ${easePower} forwards`
               : 'none',
             display: 'flex',
             alignItems: 'center',
@@ -89,28 +89,16 @@ const SplashLoader = ({ onFinish }) => {
         >
           <span style={{
             fontFamily: 'monospace',
-            fontSize: '0.65rem', // Bada kar diya
+            fontSize: '0.65rem',
             letterSpacing: '0.35em',
             color: 'rgba(255,255,255,0.2)',
             textTransform: 'uppercase',
             fontWeight: 700,
-            animation: 'ff-text 0.4s ease 0.5s both',
+            animation: 'ff-text 0.3s ease 0.1s both',
           }}>
             est. 2024
           </span>
         </div>
-
-        {/* ── DIVIDER LINE (top → mid) ── */}
-        <div style={{
-          position: 'absolute',
-          top: '33.334%',
-          left: 0,
-          width: '100%',
-          height: '1px',
-          background: 'rgba(255,255,255,0.06)',
-          zIndex: 1,
-          animation: exiting ? `ff-fade-out 0.3s ease forwards` : 'none',
-        }} />
 
         {/* ── MIDDLE SECTION — Logo & Text ── */}
         <div
@@ -125,7 +113,7 @@ const SplashLoader = ({ onFinish }) => {
             alignItems: 'center',
             justifyContent: 'center',
             animation: exiting
-              ? `ff-fade-out 0.55s ease 0.1s forwards`
+              ? `ff-fade-out 0.4s ease forwards`
               : 'none',
           }}
         >
@@ -136,78 +124,66 @@ const SplashLoader = ({ onFinish }) => {
             gap: 0,
           }}>
 
-            {/* Logo Image - Pehle se bada size */}
+            {/* Logo Image */}
             <img
               src="https://i.postimg.cc/5yxd84ZJ/Fight-Flex2-removebg-preview.png"
               alt="FightFlex"
               style={{
-                width: 'clamp(90px, 15vw, 140px)', // Bada sizing (Purana: 60px to 90px)
+                width: 'clamp(90px, 15vw, 140px)',
                 objectFit: 'contain',
                 filter: 'brightness(0) invert(1)',
-                animation: 'ff-logo 0.7s cubic-bezier(0.34,1.4,0.64,1) 0.2s both',
+                animation: 'ff-logo 0.4s cubic-bezier(0.34,1.4,0.64,1) both',
               }}
             />
 
-            {/* Brand Title - Pehle se bada font */}
+            {/* Brand Title */}
             <span style={{
               fontFamily: 'monospace',
               fontWeight: 900,
-              fontSize: 'clamp(1.75rem, 5.5vw, 2.75rem)', // Bada font (Purana: 1.25rem to 1.75rem)
+              fontSize: 'clamp(1.75rem, 5.5vw, 2.75rem)',
               letterSpacing: '0.4em',
               color: '#fff',
               marginTop: '12px',
-              animation: 'ff-text 0.5s ease 0.5s both',
+              animation: 'ff-text 0.3s ease 0.15s both',
             }}>
               FIGHTFLEX
             </span>
 
-            {/* Tagline - Bada font size */}
+            {/* Tagline */}
             <span style={{
               fontFamily: 'system-ui, sans-serif',
               fontWeight: 600,
-              fontSize: 'clamp(0.7rem, 2vw, 0.95rem)', // Bada font (Purana: 0.58rem)
+              fontSize: 'clamp(0.7rem, 2vw, 0.95rem)',
               letterSpacing: '0.32em',
               color: 'rgba(255,255,255,0.4)',
               textTransform: 'uppercase',
               marginTop: '8px',
-              animation: 'ff-text 0.5s ease 0.7s both',
+              animation: 'ff-text 0.3s ease 0.25s both',
             }}>
               Train Hard. Fight Smart.
             </span>
 
-            {/* Progress bar - Thodi wider or adjust ki gayi duration */}
+            {/* Progress Bar (Fast 0.8s fill) */}
             <div style={{
               marginTop: '32px',
-              width: 'clamp(160px, 25vw, 240px)', // Bada sizing
+              width: 'clamp(160px, 25vw, 240px)',
               height: '2px',
               background: 'rgba(255,255,255,0.1)',
               borderRadius: '999px',
               overflow: 'hidden',
-              animation: 'ff-text 0.3s ease 0.9s both',
+              animation: 'ff-text 0.2s ease 0.3s both',
             }}>
               <div style={{
                 height: '100%',
                 background: '#fff',
                 borderRadius: '999px',
-                animation: 'ff-bar 2.8s cubic-bezier(0.4,0,0.2,1) 0.9s both', // Extended progress duration
+                animation: 'ff-bar 0.75s linear 0.25s both',
               }} />
             </div>
           </div>
         </div>
 
-        {/* ── DIVIDER LINE (mid → bot) ── */}
-        <div style={{
-          position: 'absolute',
-          top: 'calc(33.334% + 33.334%)',
-          left: 0,
-          width: '100%',
-          height: '1px',
-          background: 'rgba(255,255,255,0.06)',
-          zIndex: 1,
-          animation: exiting ? `ff-fade-out 0.3s ease forwards` : 'none',
-        }} />
-
-        {/* ── BOTTOM SECTION (slides DOWN on exit) ── */}
+        {/* ── BOTTOM SECTION ── */}
         <div
           style={{
             position: 'absolute',
@@ -215,9 +191,9 @@ const SplashLoader = ({ onFinish }) => {
             left: 0,
             width: '100%',
             height: '33.334%',
-            background: 'linear-gradient(0deg, #0d0d0d 0%, #050505 100%)',
+            background: '#000',
             animation: exiting
-              ? `ff-slide-down 0.75s ${easePower} forwards`
+              ? `ff-slide-down 0.5s ${easePower} forwards`
               : 'none',
             display: 'flex',
             alignItems: 'flex-end',
@@ -226,12 +202,12 @@ const SplashLoader = ({ onFinish }) => {
         >
           <span style={{
             fontFamily: 'monospace',
-            fontSize: '0.65rem', // Bada font
+            fontSize: '0.65rem',
             letterSpacing: '0.35em',
             color: 'rgba(255,255,255,0.2)',
             textTransform: 'uppercase',
             fontWeight: 700,
-            animation: 'ff-text 0.4s ease 0.55s both',
+            animation: 'ff-text 0.3s ease 0.15s both',
           }}>
             Premium Sportswear
           </span>

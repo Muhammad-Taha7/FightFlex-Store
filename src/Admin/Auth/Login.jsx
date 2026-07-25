@@ -45,33 +45,33 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-8 sm:p-12">
+    <div className="min-h-screen w-full bg-black text-black flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-lg bg-white border border-gray-200 rounded-3xl shadow-2xl p-6 sm:p-12">
         {/* Logo */}
-        <div className="flex flex-col items-center mb-10">
-          <h1 className="text-4xl font-black tracking-tight text-white font-mono">
+        <div className="flex flex-col items-center mb-8 sm:mb-10">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-black font-mono uppercase">
             FIGHTFLEX
           </h1>
 
-          <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-400 font-semibold">
+          <p className="mt-2 text-[10px] sm:text-xs uppercase tracking-[0.3em] text-gray-500 font-bold">
             Admin Authentication
           </p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-red-400 backdrop-blur-sm">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400" />
-            <span className="text-sm font-semibold">{error}</span>
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-black bg-black/5 p-4 text-black">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 text-black" />
+            <span className="text-xs sm:text-sm font-bold">{error}</span>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           {/* Username */}
           <div>
-            <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-              <User className="w-4 h-4 text-slate-400" />
+            <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-black">
+              <User className="w-4 h-4 text-black" />
               Username
             </label>
 
@@ -81,14 +81,14 @@ const Login = () => {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter username"
               required
-              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:border-gray-800 focus:ring-2 focus:ring-gray-800/20 font-semibold"
+              className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-5 py-3.5 sm:py-4 text-sm text-black placeholder-gray-400 outline-none transition-all duration-200 focus:border-black focus:bg-white focus:ring-2 focus:ring-black/10 font-semibold"
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-              <Lock className="w-4 h-4 text-slate-400" />
+            <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-black">
+              <Lock className="w-4 h-4 text-black" />
               Password
             </label>
 
@@ -98,7 +98,7 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:border-gray-800 focus:ring-2 focus:ring-gray-800/20 font-semibold"
+              className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-5 py-3.5 sm:py-4 text-sm text-black placeholder-gray-400 outline-none transition-all duration-200 focus:border-black focus:bg-white focus:ring-2 focus:ring-black/10 font-semibold"
             />
           </div>
 
@@ -106,7 +106,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gray-900 py-4 text-sm font-bold text-white transition-all duration-200 hover:bg-gray-800 disabled:opacity-50 shadow-lg shadow-gray-900/20"
+            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-black py-4 text-sm font-bold text-white transition-all duration-200 hover:bg-gray-800 active:scale-[0.99] disabled:opacity-50 shadow-lg"
           >
             {loading ? (
               <>
