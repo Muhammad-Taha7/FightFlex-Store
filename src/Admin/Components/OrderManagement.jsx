@@ -59,7 +59,8 @@ const DialogBox = ({ open, onClose, type = 'info', title, message, onConfirm, co
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, day, week, month, year
+  const [filter, setFilter] = useState('all');         // date range: all, day, week, month, year
+  const [statusFilter, setStatusFilter] = useState('all'); // status: all, pending, dispatched, cleared, cancelled
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   
@@ -145,11 +146,18 @@ const OrderManagement = () => {
     );
   };
 
-  const filteredOrders = orders.filter(order => 
-    order._id.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    (order.user?.name && order.user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (order.user?.username && order.user.username.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredOrders = orders.filter(order => {
+    // Status filter
+    if (statusFilter !== 'all' && order.status !== statusFilter) return false;
+    // Search filter
+    const q = searchQuery.toLowerCase();
+    if (!q) return true;
+    return (
+      order._id.toLowerCase().includes(q) ||
+      (order.user?.name && order.user.name.toLowerCase().includes(q)) ||
+      (order.user?.username && order.user.username.toLowerCase().includes(q))
+    );
+  });
 
   const handleDownloadCSV = () => {
     if (filteredOrders.length === 0) {
@@ -192,67 +200,149 @@ const OrderManagement = () => {
   return (
     <div className="space-y-6">
 
-      {/* Quick Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-          <p className="text-xs text-gray-500 font-semibold uppercase">Total</p>
-          <p className="text-2xl font-black text-gray-900">{orders.length}</p>
-        </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-          <p className="text-xs text-amber-600 font-semibold uppercase">Pending</p>
-          <p className="text-2xl font-black text-amber-700">{pendingCount}</p>
-        </div>
-        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
-          <p className="text-xs text-gray-900 font-semibold uppercase">Dispatched</p>
-          <p className="text-2xl font-black text-black">{dispatchedCount}</p>
-        </div>
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
-          <p className="text-xs text-emerald-600 font-semibold uppercase">Cleared</p>
-          <p className="text-2xl font-black text-emerald-700">{clearedCount}</p>
-        </div>
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
-          <p className="text-xs text-red-600 font-semibold uppercase">Cancelled</p>
-          <p className="text-2xl font-black text-red-700">{cancelledCount}</p>
-        </div>
+      {/* Quick Stats Row — click to filter by status */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        {/* Total */}
+        <button
+          onClick={() => setStatusFilter('all')}
+          className={`text-left rounded-2xl p-4 border-2 transition-all ${
+            statusFilter === 'all'
+              ? 'bg-gray-900 border-gray-900'
+              : 'bg-white border-gray-100 hover:border-gray-300 shadow-sm'
+          }`}
+        >
+          <p className={`text-xs font-bold uppercase tracking-wide ${ statusFilter === 'all' ? 'text-gray-400' : 'text-gray-500'}`}>All Orders</p>
+          <p className={`text-2xl font-black ${ statusFilter === 'all' ? 'text-white' : 'text-gray-900'}`}>{orders.length}</p>
+        </button>
+
+        {/* Pending */}
+        <button
+          onClick={() => setStatusFilter('pending')}
+          className={`text-left rounded-2xl p-4 border-2 transition-all ${
+            statusFilter === 'pending'
+              ? 'bg-amber-500 border-amber-500'
+              : 'bg-amber-50 border-amber-100 hover:border-amber-300'
+          }`}
+        >
+          <p className={`text-xs font-bold uppercase tracking-wide ${ statusFilter === 'pending' ? 'text-amber-100' : 'text-amber-600'}`}>Pending</p>
+          <p className={`text-2xl font-black ${ statusFilter === 'pending' ? 'text-white' : 'text-amber-700'}`}>{pendingCount}</p>
+        </button>
+
+        {/* Dispatched */}
+        <button
+          onClick={() => setStatusFilter('dispatched')}
+          className={`text-left rounded-2xl p-4 border-2 transition-all ${
+            statusFilter === 'dispatched'
+              ? 'bg-gray-900 border-gray-900'
+              : 'bg-gray-50 border-gray-200 hover:border-gray-400'
+          }`}
+        >
+          <p className={`text-xs font-bold uppercase tracking-wide ${ statusFilter === 'dispatched' ? 'text-gray-400' : 'text-gray-600'}`}>Dispatched</p>
+          <p className={`text-2xl font-black ${ statusFilter === 'dispatched' ? 'text-white' : 'text-black'}`}>{dispatchedCount}</p>
+        </button>
+
+        {/* Cleared */}
+        <button
+          onClick={() => setStatusFilter('cleared')}
+          className={`text-left rounded-2xl p-4 border-2 transition-all ${
+            statusFilter === 'cleared'
+              ? 'bg-emerald-600 border-emerald-600'
+              : 'bg-emerald-50 border-emerald-100 hover:border-emerald-300'
+          }`}
+        >
+          <p className={`text-xs font-bold uppercase tracking-wide ${ statusFilter === 'cleared' ? 'text-emerald-100' : 'text-emerald-600'}`}>Cleared</p>
+          <p className={`text-2xl font-black ${ statusFilter === 'cleared' ? 'text-white' : 'text-emerald-700'}`}>{clearedCount}</p>
+        </button>
+
+        {/* Cancelled */}
+        <button
+          onClick={() => setStatusFilter('cancelled')}
+          className={`text-left rounded-2xl p-4 border-2 transition-all ${
+            statusFilter === 'cancelled'
+              ? 'bg-red-600 border-red-600'
+              : 'bg-red-50 border-red-100 hover:border-red-300'
+          }`}
+        >
+          <p className={`text-xs font-bold uppercase tracking-wide ${ statusFilter === 'cancelled' ? 'text-red-100' : 'text-red-600'}`}>Cancelled</p>
+          <p className={`text-2xl font-black ${ statusFilter === 'cancelled' ? 'text-white' : 'text-red-700'}`}>{cancelledCount}</p>
+        </button>
       </div>
       
       {/* Filters and Search */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between gap-4">
-        
-        <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto hide-scrollbar">
-          {['all', 'day', 'week', 'month', 'year'].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-6 py-2 rounded-lg font-medium text-sm transition-all capitalize whitespace-nowrap ${
-                filter === f 
-                  ? 'bg-white text-gray-900 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
-              }`}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
+
+        {/* Row 1: Date range tabs + search + export */}
+        <div className="flex flex-col md:flex-row justify-between gap-3">
+          <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto hide-scrollbar">
+            {['all', 'day', 'week', 'month', 'year'].map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-5 py-2 rounded-lg font-medium text-sm transition-all capitalize whitespace-nowrap ${
+                  filter === f 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+                }`}
+              >
+                {f === 'day' ? 'Today' : f === 'all' ? 'All Time' : `This ${f}`}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search Order ID or Name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full md:w-72 pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-800/20 focus:border-gray-800 transition-all text-sm"
+              />
+            </div>
+            <button 
+              onClick={handleDownloadCSV}
+              className="flex items-center gap-2 bg-gray-900 text-white hover:bg-black px-4 py-2.5 rounded-xl font-semibold transition text-sm whitespace-nowrap"
             >
-              {f === 'day' ? 'Today' : f === 'all' ? 'All Time' : `This ${f}`}
+              <Download className="w-4 h-4" />
+              Export
             </button>
-          ))}
+          </div>
         </div>
 
-        <div className="flex gap-3">
-          <div className="relative flex-1">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search Order ID or Name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-80 pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-800/20 focus:border-gray-800 transition-all text-sm"
-            />
-          </div>
-          <button 
-            onClick={handleDownloadCSV}
-            className="flex items-center gap-2 bg-gray-900 text-white hover:bg-black px-4 py-2.5 rounded-xl font-semibold transition text-sm whitespace-nowrap"
-          >
-            <Download className="w-4 h-4" />
-            Export
-          </button>
+        {/* Row 2: Status filter pills */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-1">Status:</span>
+          {[
+            { key: 'all',        label: 'All',        color: 'bg-gray-900 text-white',       off: 'bg-gray-100 text-gray-600 hover:bg-gray-200' },
+            { key: 'pending',    label: 'Pending',    color: 'bg-amber-500 text-white',       off: 'bg-amber-50  text-amber-700 hover:bg-amber-100 border border-amber-200' },
+            { key: 'dispatched', label: 'Dispatched', color: 'bg-gray-800  text-white',       off: 'bg-gray-100  text-gray-700 hover:bg-gray-200' },
+            { key: 'cleared',    label: 'Cleared',    color: 'bg-emerald-600 text-white',     off: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200' },
+            { key: 'cancelled',  label: 'Cancelled',  color: 'bg-red-600    text-white',       off: 'bg-red-50    text-red-700 hover:bg-red-100 border border-red-200' },
+          ].map(({ key, label, color, off }) => (
+            <button
+              key={key}
+              onClick={() => setStatusFilter(key)}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                statusFilter === key ? color : off
+              }`}
+            >
+              {label}
+              {key !== 'all' && (
+                <span className="ml-1.5 opacity-70">
+                  ({key === 'pending' ? pendingCount : key === 'dispatched' ? dispatchedCount : key === 'cleared' ? clearedCount : cancelledCount})
+                </span>
+              )}
+            </button>
+          ))}
+          {statusFilter !== 'all' && (
+            <button
+              onClick={() => setStatusFilter('all')}
+              className="ml-auto text-xs text-gray-400 hover:text-gray-700 flex items-center gap-1 transition-colors"
+            >
+              <X className="w-3 h-3" /> Clear filter
+            </button>
+          )}
         </div>
       </div>
 

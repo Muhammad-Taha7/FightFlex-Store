@@ -1,232 +1,244 @@
 import React, { useState, useEffect } from 'react';
 
 /**
- * SplashLoader — 3-section animation
- *  Strip 1 (left half)  slides in from LEFT
- *  Strip 2 (right half) slides in from RIGHT
- *  Strip 3 (top strip)  slides down from TOP
- *  Logo + text appear in center
- *  All 3 sections slide back out on exit
+ * FightFlex SplashLoader
+ * - Enlarged Logo, Brand, and Tagline fonts
+ * - Increased display duration for better visual impact
+ * - Smooth split transitions on exit
  */
+
 const SplashLoader = ({ onFinish }) => {
-  const [phase, setPhase] = useState(0);
-  // 0 = initial (all hidden)
-  // 1 = strip1 enters from left
-  // 2 = strip2 enters from right
-  // 3 = strip3 enters from top
-  // 4 = logo/text fade in + hold
-  // 5 = exit begins
-  // 6 = done
+  const [exiting, setExiting] = useState(false);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 50);
-    const t2 = setTimeout(() => setPhase(2), 300);
-    const t3 = setTimeout(() => setPhase(3), 550);
-    const t4 = setTimeout(() => setPhase(4), 800);
-    const t5 = setTimeout(() => setPhase(5), 2400);
-    const t6 = setTimeout(() => setPhase(6), 3300);
-    return () => [t1, t2, t3, t4, t5, t6].forEach(clearTimeout);
-  }, []);
+    // Increased duration: Hold splash for ~4 seconds before exit sequence starts
+    const t1 = setTimeout(() => setExiting(true), 4000);
+    const t2 = setTimeout(() => {
+      setDone(true);
+      onFinish?.();
+    }, 4800); // 4000ms hold + 800ms slide-out animation
 
-  useEffect(() => {
-    if (phase === 6) onFinish?.();
-  }, [phase, onFinish]);
+    return () => { 
+      clearTimeout(t1); 
+      clearTimeout(t2); 
+    };
+  }, [onFinish]);
 
-  if (phase === 6) return null;
+  if (done) return null;
 
-  const entering = (p) => phase >= p && phase < 5;
-  const exiting  = phase === 5;
-
-  const ease = 'cubic-bezier(0.76, 0, 0.24, 1)';
+  const easePower = 'cubic-bezier(0.76, 0, 0.24, 1)';
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 99999,
-        overflow: 'hidden',
-        background: '#000',         // solid black fallback so no gap ever shows
-        pointerEvents: 'all',       // block ALL interaction under the splash
-      }}
-    >
-      {/* ── Strip 1: Left half, slides in from LEFT ── */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '50%',
-          height: '100%',
-          background: '#111',
-          transform: entering(1)
-            ? exiting ? 'translateX(-102%)' : 'translateX(0)'
-            : 'translateX(-102%)',
-          transition: exiting
-            ? `transform 0.65s ${ease}`
-            : phase === 1
-            ? `transform 0.5s ${ease}`
-            : 'none',
-        }}
-      />
+    <>
+      {/* Keyframe definitions */}
+      <style>{`
+        @keyframes ff-logo {
+          0%   { opacity: 0; transform: scale(0.8) translateY(20px); }
+          100% { opacity: 1; transform: scale(1)   translateY(0);    }
+        }
+        @keyframes ff-text {
+          0%   { opacity: 0; transform: translateY(12px); }
+          100% { opacity: 1; transform: translateY(0);    }
+        }
+        @keyframes ff-bar {
+          0%   { width: 0%; }
+          100% { width: 100%; }
+        }
+        @keyframes ff-slide-up {
+          0%   { transform: translateY(0);    }
+          100% { transform: translateY(-101%); }
+        }
+        @keyframes ff-slide-down {
+          0%   { transform: translateY(0);   }
+          100% { transform: translateY(101%); }
+        }
+        @keyframes ff-fade-out {
+          0%   { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
 
-      {/* ── Strip 2: Right half, slides in from RIGHT ── */}
+      {/* Outer container */}
       <div
         style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: '50%',
-          height: '100%',
-          background: '#0d0d0d',
-          transform: entering(2)
-            ? exiting ? 'translateX(102%)' : 'translateX(0)'
-            : 'translateX(102%)',
-          transition: exiting
-            ? `transform 0.65s ${ease} 0.06s`
-            : phase === 2
-            ? `transform 0.5s ${ease}`
-            : 'none',
-        }}
-      />
-
-      {/* ── Strip 3: Top bar, slides down from TOP ── */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '64px',
-          background: '#181818',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
-          transform: entering(3)
-            ? exiting ? 'translateY(-102%)' : 'translateY(0)'
-            : 'translateY(-102%)',
-          transition: exiting
-            ? `transform 0.55s ${ease} 0.12s`
-            : phase === 3
-            ? `transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1)`
-            : 'none',
-          zIndex: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 32px',
-        }}
-      >
-        {/* Top bar left dots */}
-        <div style={{ display: 'flex', gap: '8px' }}>
-          {[1, 2, 3].map((i) => (
-            <span
-              key={i}
-              style={{
-                width: 8, height: 8, borderRadius: '50%',
-                background: `rgba(255,255,255,${0.1 * i})`,
-                display: 'block',
-              }}
-            />
-          ))}
-        </div>
-        {/* Top bar label */}
-        <span style={{
-          fontFamily: 'monospace', fontSize: '0.6rem',
-          letterSpacing: '0.3em', color: 'rgba(255,255,255,0.2)',
-          textTransform: 'uppercase', fontWeight: 700,
-        }}>
-          Loading...
-        </span>
-      </div>
-
-      {/* ── Center Logo ── */}
-      <div
-        style={{
-          position: 'absolute',
+          position: 'fixed',
           inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 3,
-          pointerEvents: 'none',
+          zIndex: 99999,
+          overflow: 'hidden',
+          pointerEvents: 'all',
         }}
       >
-        {/* Logo image */}
-        <img
-          src="https://i.postimg.cc/5yxd84ZJ/Fight-Flex2-removebg-preview.png"
-          alt="FightFlex"
-          style={{
-            width: '100px',
-            objectFit: 'contain',
-            filter: 'brightness(0) invert(1)',
-            opacity: phase >= 4 && !exiting ? 1 : 0,
-            transform: phase >= 4 && !exiting ? 'scale(1) translateY(0)' : 'scale(0.85) translateY(12px)',
-            transition: 'opacity 0.5s ease, transform 0.55s cubic-bezier(0.34,1.4,0.64,1)',
-          }}
-        />
-
-        {/* Brand name */}
-        <span
-          style={{
-            fontFamily: 'monospace',
-            fontWeight: 900,
-            fontSize: 'clamp(1.4rem, 5vw, 2rem)',
-            letterSpacing: '0.3em',
-            color: '#fff',
-            marginTop: '10px',
-            opacity: phase >= 4 && !exiting ? 1 : 0,
-            transform: phase >= 4 && !exiting ? 'translateY(0)' : 'translateY(10px)',
-            transition: 'opacity 0.45s ease 0.1s, transform 0.45s ease 0.1s',
-          }}
-        >
-          FIGHTFLEX
-        </span>
-
-        {/* Tagline */}
-        <span
-          style={{
-            fontFamily: 'sans-serif',
-            fontWeight: 500,
-            fontSize: '0.6rem',
-            letterSpacing: '0.28em',
-            color: 'rgba(255,255,255,0.35)',
-            textTransform: 'uppercase',
-            marginTop: '6px',
-            opacity: phase >= 4 && !exiting ? 1 : 0,
-            transform: phase >= 4 && !exiting ? 'translateY(0)' : 'translateY(8px)',
-            transition: 'opacity 0.45s ease 0.22s, transform 0.45s ease 0.22s',
-          }}
-        >
-          Train Hard. Fight Smart.
-        </span>
-
-        {/* Progress bar */}
+        {/* ── TOP SECTION (slides UP on exit) ── */}
         <div
           style={{
-            marginTop: '32px',
-            width: 'min(160px, 40vw)',
-            height: '2px',
-            background: 'rgba(255,255,255,0.08)',
-            borderRadius: '999px',
-            overflow: 'hidden',
-            opacity: phase >= 4 && !exiting ? 1 : 0,
-            transition: 'opacity 0.3s ease 0.3s',
+            position: 'absolute',
+            top: 0, 
+            left: 0,
+            width: '100%',
+            height: '33.334%',
+            background: 'linear-gradient(180deg, #0d0d0d 0%, #050505 100%)',
+            animation: exiting
+              ? `ff-slide-up 0.75s ${easePower} forwards`
+              : 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            padding: '0 36px',
           }}
         >
-          <div
-            style={{
-              height: '100%',
-              background: '#fff',
-              borderRadius: '999px',
-              width: phase >= 4 && !exiting ? '100%' : '0%',
-              transition: phase >= 4 && !exiting
-                ? 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.35s'
-                : 'none',
-            }}
-          />
+          <span style={{
+            fontFamily: 'monospace',
+            fontSize: '0.65rem', // Bada kar diya
+            letterSpacing: '0.35em',
+            color: 'rgba(255,255,255,0.2)',
+            textTransform: 'uppercase',
+            fontWeight: 700,
+            animation: 'ff-text 0.4s ease 0.5s both',
+          }}>
+            est. 2024
+          </span>
         </div>
+
+        {/* ── DIVIDER LINE (top → mid) ── */}
+        <div style={{
+          position: 'absolute',
+          top: '33.334%',
+          left: 0,
+          width: '100%',
+          height: '1px',
+          background: 'rgba(255,255,255,0.06)',
+          zIndex: 1,
+          animation: exiting ? `ff-fade-out 0.3s ease forwards` : 'none',
+        }} />
+
+        {/* ── MIDDLE SECTION — Logo & Text ── */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '33.334%',
+            left: 0,
+            width: '100%',
+            height: '33.334%',
+            background: '#000',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: exiting
+              ? `ff-fade-out 0.55s ease 0.1s forwards`
+              : 'none',
+          }}
+        >
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 0,
+          }}>
+
+            {/* Logo Image - Pehle se bada size */}
+            <img
+              src="https://i.postimg.cc/5yxd84ZJ/Fight-Flex2-removebg-preview.png"
+              alt="FightFlex"
+              style={{
+                width: 'clamp(90px, 15vw, 140px)', // Bada sizing (Purana: 60px to 90px)
+                objectFit: 'contain',
+                filter: 'brightness(0) invert(1)',
+                animation: 'ff-logo 0.7s cubic-bezier(0.34,1.4,0.64,1) 0.2s both',
+              }}
+            />
+
+            {/* Brand Title - Pehle se bada font */}
+            <span style={{
+              fontFamily: 'monospace',
+              fontWeight: 900,
+              fontSize: 'clamp(1.75rem, 5.5vw, 2.75rem)', // Bada font (Purana: 1.25rem to 1.75rem)
+              letterSpacing: '0.4em',
+              color: '#fff',
+              marginTop: '12px',
+              animation: 'ff-text 0.5s ease 0.5s both',
+            }}>
+              FIGHTFLEX
+            </span>
+
+            {/* Tagline - Bada font size */}
+            <span style={{
+              fontFamily: 'system-ui, sans-serif',
+              fontWeight: 600,
+              fontSize: 'clamp(0.7rem, 2vw, 0.95rem)', // Bada font (Purana: 0.58rem)
+              letterSpacing: '0.32em',
+              color: 'rgba(255,255,255,0.4)',
+              textTransform: 'uppercase',
+              marginTop: '8px',
+              animation: 'ff-text 0.5s ease 0.7s both',
+            }}>
+              Train Hard. Fight Smart.
+            </span>
+
+            {/* Progress bar - Thodi wider or adjust ki gayi duration */}
+            <div style={{
+              marginTop: '32px',
+              width: 'clamp(160px, 25vw, 240px)', // Bada sizing
+              height: '2px',
+              background: 'rgba(255,255,255,0.1)',
+              borderRadius: '999px',
+              overflow: 'hidden',
+              animation: 'ff-text 0.3s ease 0.9s both',
+            }}>
+              <div style={{
+                height: '100%',
+                background: '#fff',
+                borderRadius: '999px',
+                animation: 'ff-bar 2.8s cubic-bezier(0.4,0,0.2,1) 0.9s both', // Extended progress duration
+              }} />
+            </div>
+          </div>
+        </div>
+
+        {/* ── DIVIDER LINE (mid → bot) ── */}
+        <div style={{
+          position: 'absolute',
+          top: 'calc(33.334% + 33.334%)',
+          left: 0,
+          width: '100%',
+          height: '1px',
+          background: 'rgba(255,255,255,0.06)',
+          zIndex: 1,
+          animation: exiting ? `ff-fade-out 0.3s ease forwards` : 'none',
+        }} />
+
+        {/* ── BOTTOM SECTION (slides DOWN on exit) ── */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0, 
+            left: 0,
+            width: '100%',
+            height: '33.334%',
+            background: 'linear-gradient(0deg, #0d0d0d 0%, #050505 100%)',
+            animation: exiting
+              ? `ff-slide-down 0.75s ${easePower} forwards`
+              : 'none',
+            display: 'flex',
+            alignItems: 'flex-end',
+            padding: '0 0 28px 36px',
+          }}
+        >
+          <span style={{
+            fontFamily: 'monospace',
+            fontSize: '0.65rem', // Bada font
+            letterSpacing: '0.35em',
+            color: 'rgba(255,255,255,0.2)',
+            textTransform: 'uppercase',
+            fontWeight: 700,
+            animation: 'ff-text 0.4s ease 0.55s both',
+          }}>
+            Premium Sportswear
+          </span>
+        </div>
+
       </div>
-    </div>
+    </>
   );
 };
 

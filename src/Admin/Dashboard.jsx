@@ -10,6 +10,7 @@ import UserManagement from './Components/UserManagement';
 import CarouselManagement from './Components/CarouselManagement';
 import ProductManagement from './Components/ProductManagement';
 import OrderManagement from './Components/OrderManagement';
+import DashboardLoader from './Components/DashboardLoader';
 import { Menu, X, Dumbbell, Bell, Users, Settings } from 'lucide-react';
 
 export const Dashboard = () => {
@@ -19,6 +20,13 @@ export const Dashboard = () => {
 
     const [activeTab, setActiveTab] = useState('overview');
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [dashLoading, setDashLoading] = useState(true);
+
+    // Show branded loader on first mount
+    useEffect(() => {
+        const t = setTimeout(() => setDashLoading(false), 1800);
+        return () => clearTimeout(t);
+    }, []);
     
     // Notification logic
     const [hasNewOrder, setHasNewOrder] = useState(false);
@@ -59,6 +67,8 @@ export const Dashboard = () => {
         await dispatch(logoutAdmin());
         navigate('/login');
     };
+
+    if (dashLoading) return <DashboardLoader message="Loading dashboard..." />;
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col md:flex-row font-sans">
@@ -107,66 +117,108 @@ export const Dashboard = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="relative cursor-pointer">
-                            <button 
-                                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                                className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-500 hover:text-gray-900 transition hover:bg-gray-50"
-                            >
-                                <Bell className="w-5 h-5" />
-                            </button>
+                    <div className="relative" id="notifications-wrapper">
+                        <button
+                            onClick={() => setNotificationsOpen(!notificationsOpen)}
+                            className="relative p-2.5 bg-white border border-gray-200 rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200"
+                        >
+                            <Bell className="w-5 h-5" />
                             {hasNewOrder && (
                                 <>
-                                    <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-ping"></span>
-                                    <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
+                                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white animate-ping" />
+                                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white" />
                                 </>
                             )}
+                        </button>
 
-                            {/* Notifications Dropdown */}
-                            {notificationsOpen && (
-                                <div className="absolute top-full right-0 mt-3 w-80 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
-                                    <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                                        <h3 className="font-bold text-gray-900">Notifications</h3>
+                        {/* ── Professional Notification Panel ── */}
+                        {notificationsOpen && (
+                            <div className="absolute top-full right-0 mt-3 w-[340px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+
+                                {/* Panel Header */}
+                                <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white">
+                                    <div>
+                                        <h3 className="font-black text-gray-900 text-sm tracking-tight">Notifications</h3>
                                         {notifications.length > 0 && (
-                                            <span className="text-xs font-semibold bg-gray-100 text-black px-2 py-1 rounded-lg">
+                                            <p className="text-xs text-gray-400 mt-0.5">{notifications.length} new alert{notifications.length > 1 ? 's' : ''}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {notifications.length > 0 && (
+                                            <span className="px-2.5 py-1 bg-red-50 text-red-600 text-[10px] font-black rounded-full border border-red-100 tracking-wide uppercase">
                                                 {notifications.length} New
                                             </span>
                                         )}
-                                    </div>
-                                    <div className="max-h-[300px] overflow-y-auto">
-                                        {notifications.length === 0 ? (
-                                            <div className="p-6 text-center text-gray-500 text-sm">
-                                                <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                                                No new notifications
-                                            </div>
-                                        ) : (
-                                            notifications.map(notif => (
-                                                <div 
-                                                    key={notif.id} 
-                                                    onClick={() => {
-                                                        setActiveTab('orders');
-                                                        setNotificationsOpen(false);
-                                                    }}
-                                                    className="p-4 border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer group"
-                                                >
-                                                    <p className="text-sm text-gray-800 font-medium group-hover:text-black transition-colors">{notif.message}</p>
-                                                    <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                    <div className="p-3 bg-gray-50/50 border-t border-gray-100 text-center">
-                                        <button 
+                                        <button
                                             onClick={() => setNotificationsOpen(false)}
-                                            className="text-sm font-semibold text-gray-500 hover:text-gray-900"
+                                            className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-700 transition-colors"
                                         >
-                                            Close
+                                            <X className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                        <div className="h-8 w-px bg-gray-200"></div>
-                        
+
+                                {/* Notification List */}
+                                <div className="max-h-72 overflow-y-auto divide-y divide-gray-50">
+                                    {notifications.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center py-10 text-center px-5">
+                                            <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mb-3">
+                                                <Bell className="w-5 h-5 text-gray-300" />
+                                            </div>
+                                            <p className="text-sm font-bold text-gray-700">All caught up!</p>
+                                            <p className="text-xs text-gray-400 mt-1">No new notifications right now.</p>
+                                        </div>
+                                    ) : (
+                                        notifications.map(notif => (
+                                            <div
+                                                key={notif.id}
+                                                onClick={() => { setActiveTab('orders'); setNotificationsOpen(false); }}
+                                                className="flex items-start gap-4 px-5 py-4 hover:bg-gray-50 cursor-pointer transition-colors group"
+                                            >
+                                                {/* Icon */}
+                                                <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                                                    <Bell className="w-4 h-4 text-amber-600" />
+                                                </div>
+                                                {/* Content */}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-gray-800 leading-snug group-hover:text-gray-900 transition-colors">
+                                                        {notif.message}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 mt-1.5">
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                                                            Pending Orders
+                                                        </span>
+                                                        <span className="text-xs text-gray-400">{notif.time}</span>
+                                                    </div>
+                                                </div>
+                                                {/* Unread dot */}
+                                                <div className="w-2 h-2 bg-red-500 rounded-full shrink-0 mt-1.5" />
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* Panel Footer */}
+                                <div className="px-5 py-3.5 border-t border-gray-100 bg-gray-50/60 flex items-center justify-between">
+                                    <button
+                                        onClick={() => { setActiveTab('orders'); setNotificationsOpen(false); }}
+                                        className="text-xs font-bold text-gray-700 hover:text-gray-900 transition-colors flex items-center gap-1.5 group"
+                                    >
+                                        View All Orders
+                                        <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setNotificationsOpen(false)}
+                                        className="text-xs font-semibold text-gray-400 hover:text-gray-700 transition-colors"
+                                    >
+                                        Dismiss
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="h-8 w-px bg-gray-200"></div>
+                    
                     </div>
                 </header>
 
