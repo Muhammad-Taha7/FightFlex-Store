@@ -18,6 +18,9 @@ import { Women } from './Client/pages/Women';
 import { Accessories } from './Client/pages/Accessories';
 import { Kids } from './Client/pages/Kids';
 import { Nutirition } from './Client/pages/Nutirition';
+import ProductDetail from './Client/pages/ProductDetail';
+import Checkout from './Client/pages/Checkout';
+
 
 // Admin Pages
 import Login from './Admin/Auth/Login';
@@ -64,6 +67,9 @@ const App = () => {
         <Route path="/accessories" element={<Accessories />} />
         <Route path="/kids" element={<Kids />} />
         <Route path="/nutrition" element={<Nutirition />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/checkout" element={<Checkout />} />
+
 
         {/* Client Protected Routes */}
         <Route path="/profile" element={

@@ -101,14 +101,14 @@ const OtpModal = ({ email, onClose }) => {
 
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto mb-4 text-blue-600">
+          <div className="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mx-auto mb-4 text-gray-900">
             <ShieldCheck size={28} />
           </div>
           <h2 className="text-xl font-black text-gray-900">Verify Your Email</h2>
           <p className="text-gray-500 text-xs sm:text-sm font-medium mt-1">
             We have sent a 6-digit verification code to
           </p>
-          <p className="text-blue-600 text-xs sm:text-sm font-bold mt-0.5 break-all">
+          <p className="text-gray-900 text-xs sm:text-sm font-bold mt-0.5 break-all">
             {email}
           </p>
         </div>
@@ -140,7 +140,7 @@ const OtpModal = ({ email, onClose }) => {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className={`w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-extrabold text-gray-900 bg-gray-50 border rounded-xl outline-none transition-all duration-200 ${
-                  digit ? 'border-blue-600 bg-white ring-2 ring-blue-100' : 'border-gray-300 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-100'
+                  digit ? 'border-gray-900 bg-white ring-2 ring-gray-100' : 'border-gray-300 focus:border-gray-900 focus:bg-white focus:ring-2 focus:ring-gray-100'
                 }`}
               />
             ))}
@@ -150,7 +150,7 @@ const OtpModal = ({ email, onClose }) => {
           <button
             type="submit"
             disabled={!isComplete || loading}
-            className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl text-sm transition-all duration-200 hover:bg-blue-700 disabled:opacity-50 cursor-pointer border-none shadow-md shadow-blue-600/20">
+            className="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl text-sm transition-all duration-200 hover:bg-black disabled:opacity-50 cursor-pointer border-none shadow-md shadow-gray-900/20">
             {loading ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -171,12 +171,12 @@ const OtpModal = ({ email, onClose }) => {
                 type="button"
                 onClick={handleResend}
                 disabled={loading}
-                className="text-blue-600 font-bold hover:text-blue-700 underline bg-transparent border-none cursor-pointer transition-colors inline-flex items-center gap-1 ml-1">
+                className="text-gray-900 font-bold hover:text-black underline bg-transparent border-none cursor-pointer transition-colors inline-flex items-center gap-1 ml-1">
                 <RefreshCw size={12} /> Resend Code
               </button>
             ) : (
               <span className="text-gray-400 font-bold ml-1">
-                Resend in <span className="text-blue-600 font-extrabold">{timer}s</span>
+                Resend in <span className="text-gray-900 font-extrabold">{timer}s</span>
               </span>
             )}
           </p>

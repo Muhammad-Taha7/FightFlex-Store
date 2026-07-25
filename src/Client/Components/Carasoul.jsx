@@ -89,7 +89,7 @@ export const Carousel = () => {
                 
                 {/* LEFT SIDE: Professional FightFlex Text (Chota font mobile par) */}
                 <div className="max-w-xs sm:max-w-xl text-left space-y-1 sm:space-y-3 z-10">
-                  <span className="inline-block px-2 py-0.5 sm:px-3 sm:py-1 bg-blue-600/90 backdrop-blur-md text-white text-[10px] sm:text-xs font-black tracking-widest uppercase rounded-md shadow-md">
+                  <span className="inline-block px-2 py-0.5 sm:px-3 sm:py-1 bg-gray-900/90 backdrop-blur-md text-white text-[10px] sm:text-xs font-black tracking-widest uppercase rounded-md shadow-md">
                     FightFlex Apparel
                   </span>
                   <h2 className="text-lg sm:text-4xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-tight drop-shadow-lg">
@@ -104,7 +104,7 @@ export const Carousel = () => {
                 <div className="z-10 flex-shrink-0 self-end md:self-center mb-0.5 md:mb-0">
                   <Link
                     to={item.link || "/men"}
-                    className="inline-flex items-center gap-1.5 sm:gap-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[11px] sm:text-base px-3.5 sm:px-8 py-2 sm:py-4 rounded-lg sm:rounded-xl shadow-lg hover:shadow-blue-600/50 hover:scale-105 transition-all duration-300 no-underline uppercase tracking-wider"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 bg-gray-900 hover:bg-black text-white font-extrabold text-[11px] sm:text-base px-3.5 sm:px-8 py-2 sm:py-4 rounded-lg sm:rounded-xl shadow-lg hover:shadow-gray-900/50 hover:scale-105 transition-all duration-300 no-underline uppercase tracking-wider"
                   >
                     <span>Shop Now</span>
                     <svg
@@ -185,7 +185,7 @@ export const Carousel = () => {
                 onClick={() => setCurrentIndex(index)}
                 className={`h-1.5 sm:h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
                   index === currentIndex
-                    ? "w-5 sm:w-9 bg-blue-600"
+                    ? "w-5 sm:w-9 bg-gray-900"
                     : "w-1.5 sm:w-2.5 bg-white/50 hover:bg-white"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}

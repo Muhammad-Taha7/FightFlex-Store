@@ -1,7 +1,12 @@
-import React from 'react'
+import React from 'react';
+import ShopCategory from '../Components/ShopCategory';
 
 export const Women = () => {
   return (
-    <div>Women</div>
-  )
-}
+    <ShopCategory 
+      category="Women" 
+      title="Women's Collection" 
+      description="Empower your training with our exclusive, high-performance gear tailored for women."
+    />
+  );
+};

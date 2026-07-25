@@ -5,9 +5,61 @@ import axios from 'axios';
 import { updateProfile, clearAuthStatus } from '../../store/authSlice';
 import { 
   Mail, MapPin, Calendar, Edit3, Save, X, 
-  AlertCircle, Camera, User, Phone 
+  AlertCircle, Camera, User, Phone, CheckCircle, Package 
 } from 'lucide-react';
-import SuccessModal from '../Components/SuccessModal';
+
+// Reusable Dialog Component
+const DialogBox = ({ open, onClose, type = 'info', title, message, onConfirm, confirmText, cancelText }) => {
+  if (!open) return null;
+
+  const icons = {
+    success: <CheckCircle className="w-16 h-16 text-emerald-500" />,
+    error: <XCircle className="w-16 h-16 text-red-500" />,
+    confirm: <AlertCircle className="w-16 h-16 text-amber-500" />,
+    info: <Package className="w-16 h-16 text-gray-800" />,
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl w-full max-w-sm p-8 text-center shadow-2xl animate-[scaleIn_0.2s_ease-out]">
+        <div className="flex justify-center mb-5">
+          {icons[type]}
+        </div>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
+        <p className="text-gray-500 text-sm mb-6 leading-relaxed">{message}</p>
+        <div className="flex gap-3">
+          {onConfirm ? (
+            <>
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+              >
+                {cancelText || 'Cancel'}
+              </button>
+              <button
+                onClick={() => { onConfirm(); onClose(); }}
+                className={`flex-1 py-3 px-4 rounded-xl font-bold transition-colors ${
+                  type === 'confirm' 
+                    ? 'bg-red-500 text-white hover:bg-red-600' 
+                    : 'bg-gray-900 text-white hover:bg-black'
+                }`}
+              >
+                {confirmText || 'Confirm'}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onClose}
+              className="w-full py-3 px-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors"
+            >
+              OK
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -21,18 +73,20 @@ const Profile = () => {
     phone: '',
   });
 
-  // Success Modal States
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [successTitle, setSuccessTitle] = useState('Success!');
-  const [successMsg, setSuccessMsg] = useState('Operation completed successfully.');
-  
+  // Dialog State
+  const [dialog, setDialog] = useState({ open: false, type: 'info', title: '', message: '', onConfirm: null });
+  const showDialog = (type, title, message, onConfirm = null) => {
+    setDialog({ open: true, type, title, message, onConfirm });
+  };
+  const closeDialog = () => setDialog({ ...dialog, open: false });
+
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
   // Authentication check
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/signup');
+      navigate('/client-login');
     }
   }, [isAuthenticated, navigate]);
 
@@ -40,7 +94,7 @@ const Profile = () => {
   useEffect(() => {
     if (user) {
       setEditData({
-        username: user.username || '',
+        username: user.username || user.name || '',
         address: user.address || '',
         phone: user.phone || '',
       });
@@ -64,9 +118,9 @@ const Profile = () => {
 
     if (updateProfile.fulfilled.match(result)) {
       setIsEditing(false);
-      setSuccessTitle('Profile Updated!');
-      setSuccessMsg('Your profile details have been successfully saved.');
-      setShowSuccess(true);
+      showDialog('success', 'Profile Updated', 'Your profile details have been successfully saved.');
+    } else {
+      showDialog('error', 'Update Failed', 'Failed to update profile details.');
     }
   };
 
@@ -92,14 +146,12 @@ const Profile = () => {
           const result = await dispatch(updateProfile({ profileImage: imageUrl }));
           
           if (updateProfile.fulfilled.match(result)) {
-            setSuccessTitle('Avatar Updated!');
-            setSuccessMsg('Your profile picture has been uploaded successfully.');
-            setShowSuccess(true);
+            showDialog('success', 'Avatar Updated', 'Your profile picture has been uploaded successfully.');
           }
         }
       } catch (err) {
         console.error('Image upload failed:', err);
-        alert(err.response?.data?.message || 'Failed to upload profile image.');
+        showDialog('error', 'Upload Failed', err.response?.data?.message || 'Failed to upload profile image.');
       } finally {
         setIsUploading(false);
       }
@@ -109,7 +161,7 @@ const Profile = () => {
   const handleCancel = () => {
     setIsEditing(false);
     setEditData({
-      username: user?.username || '',
+      username: user?.username || user?.name || '',
       address: user?.address || '',
       phone: user?.phone || '',
     });
@@ -118,63 +170,47 @@ const Profile = () => {
 
   if (!user) return null;
 
-  const userAvatar = user.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || 'User')}&background=3b82f6&color=ffffff&size=200&bold=true`;
+  const userAvatar = user.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || user.name || 'User')}&background=3b82f6&color=ffffff&size=200&bold=true`;
   
   const memberSince = user.createdAt 
     ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : 'N/A';
 
   return (
-    <div className="min-h-screen pt-[5rem] md:pt-[10rem] w-full bg-slate-950 text-slate-100 py-8 px-4 sm:px-8 lg:px-12">
-      <div className="w-full">
+    <div className="min-h-screen pt-[5rem] md:pt-[7rem] w-full bg-slate-50 text-gray-900 py-8 px-4 sm:px-8 lg:px-12">
+      <div className="w-full max-w-5xl mx-auto">
         
-        {/* Success Modal */}
-        <SuccessModal 
-          isOpen={showSuccess} 
-          onClose={() => setShowSuccess(false)} 
-          title={successTitle} 
-          message={successMsg} 
-        />
-
         {/* Profile Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Account Settings</h1>
-            <p className="text-slate-400 text-sm font-medium mt-1">Manage your profiles, credentials, and settings.</p>
+            <h1 className="text-3xl font-black tracking-tight">Account Settings</h1>
+            <p className="text-gray-500 text-sm font-medium mt-1">Manage your profiles, credentials, and settings.</p>
           </div>
-          <span className="self-start md:self-auto px-3.5 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold rounded-full flex items-center gap-1.5 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+          <span className="self-start md:self-auto px-3.5 py-1.5 bg-gray-50 border border-gray-200 text-gray-900 text-xs font-bold rounded-full flex items-center gap-1.5 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-gray-800 animate-pulse"></span>
             Profile Verified
           </span>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-400 backdrop-blur-sm shadow-sm animate-in fade-in slide-in-from-top-2">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-400" />
-            <span className="text-sm font-semibold">{error}</span>
-          </div>
-        )}
-
-        {/* Full-width Dark Card Wrapper */}
-        <div className="w-full bg-slate-900 border border-slate-800 shadow-2xl rounded-3xl overflow-hidden transition-all duration-300">
+        {/* Full-width Card Wrapper */}
+        <div className="w-full bg-white border border-gray-200 shadow-sm rounded-3xl overflow-hidden transition-all duration-300">
           
           {/* Avatar & Info Banner */}
-          <div className="bg-slate-900/60 border-b border-slate-800 px-6 py-8 sm:px-10 flex flex-col sm:flex-row items-center gap-6">
+          <div className="bg-gray-50 border-b border-gray-200 px-6 py-8 sm:px-10 flex flex-col sm:flex-row items-center gap-6">
             
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               <img 
                 src={userAvatar} 
-                alt={user.username || 'User'}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-slate-800 shadow-xl transition-transform duration-300 group-hover:scale-105" 
+                alt={user.username || user.name || 'User'}
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white shadow-xl transition-transform duration-300 group-hover:scale-105" 
               />
               
               {isUploading ? (
-                <div className="absolute inset-0 rounded-full bg-black/70 flex items-center justify-center">
-                  <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
-                <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity duration-200 text-white gap-1 backdrop-blur-xs">
+                <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity duration-200 text-white gap-1 backdrop-blur-sm">
                   <Camera size={20} />
                   <span className="text-[0.65rem] font-bold uppercase tracking-wider">Upload</span>
                 </div>
@@ -191,9 +227,9 @@ const Profile = () => {
             />
 
             <div className="text-center sm:text-left">
-              <h2 className="text-2xl font-black text-white">{user.username}</h2>
-              <p className="text-slate-400 text-sm mt-0.5 font-medium">{user.email}</p>
-              <div className="flex items-center gap-1.5 text-slate-500 text-xs mt-2 justify-center sm:justify-start font-semibold">
+              <h2 className="text-2xl font-black text-gray-900">{user.username || user.name}</h2>
+              <p className="text-gray-500 text-sm mt-0.5 font-medium">{user.email}</p>
+              <div className="flex items-center gap-1.5 text-gray-400 text-xs mt-2 justify-center sm:justify-start font-semibold">
                 <Calendar size={13} />
                 <span>Joined on {memberSince}</span>
               </div>
@@ -205,7 +241,7 @@ const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div>
-                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
                   <User size={14} /> Profile Name
                 </label>
                 {isEditing ? (
@@ -214,57 +250,57 @@ const Profile = () => {
                     required
                     value={editData.username}
                     onChange={(e) => setEditData({ ...editData, username: e.target.value })}
-                    className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3.5 text-sm text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-semibold"
+                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3.5 text-sm outline-none focus:border-gray-800 focus:ring-2 focus:ring-gray-800/20 transition-all font-semibold text-gray-900"
                   />
                 ) : (
-                  <p className="text-white font-bold text-sm bg-slate-950/60 rounded-2xl px-5 py-3.5 border border-slate-800">
-                    {user.username}
+                  <p className="font-bold text-sm bg-gray-50 rounded-2xl px-5 py-3.5 border border-gray-200 text-gray-900">
+                    {user.username || user.name}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  <Mail size={14} /> Registered Email
+                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  <Mail size={14} /> Email Address
                 </label>
-                <p className="text-slate-500 font-medium text-sm bg-slate-950/40 rounded-2xl px-5 py-3.5 border border-slate-800/60 select-none">
-                  {user.email || '—'}
+                <p className="text-gray-500 font-medium text-sm bg-gray-100 rounded-2xl px-5 py-3.5 border border-gray-200 select-none">
+                  {user.email}
                 </p>
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
                   <Phone size={14} /> Phone Number
                 </label>
                 {isEditing ? (
                   <input
                     type="tel"
+                    placeholder="+92 XXXXXXXX"
                     value={editData.phone}
                     onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                    placeholder="Provide phone number"
-                    className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3.5 text-sm text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-semibold"
+                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3.5 text-sm outline-none focus:border-gray-800 focus:ring-2 focus:ring-gray-800/20 transition-all font-semibold text-gray-900"
                   />
                 ) : (
-                  <p className={`text-sm bg-slate-950/60 rounded-2xl px-5 py-3.5 border border-slate-800 ${user.phone ? 'text-white font-bold' : 'text-slate-500 font-medium'}`}>
-                    {user.phone || 'No phone number added yet'}
+                  <p className={`text-sm bg-gray-50 rounded-2xl px-5 py-3.5 border border-gray-200 ${user.phone ? 'font-bold text-gray-900' : 'text-gray-400 font-medium'}`}>
+                    {user.phone || 'No phone number added'}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  <MapPin size={14} /> Delivery Address
+                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  <MapPin size={14} /> Shipping Address
                 </label>
                 {isEditing ? (
                   <input
                     type="text"
+                    placeholder="Provide delivery location"
                     value={editData.address}
                     onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-                    placeholder="Provide delivery location"
-                    className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3.5 text-sm text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-semibold"
+                    className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3.5 text-sm outline-none focus:border-gray-800 focus:ring-2 focus:ring-gray-800/20 transition-all font-semibold text-gray-900"
                   />
                 ) : (
-                  <p className={`text-sm bg-slate-950/60 rounded-2xl px-5 py-3.5 border border-slate-800 ${user.address ? 'text-white font-bold' : 'text-slate-500 font-medium'}`}>
+                  <p className={`text-sm bg-gray-50 rounded-2xl px-5 py-3.5 border border-gray-200 ${user.address ? 'font-bold text-gray-900' : 'text-gray-400 font-medium'}`}>
                     {user.address || 'No address added yet'}
                   </p>
                 )}
@@ -273,13 +309,13 @@ const Profile = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-4 border-t border-slate-800 flex items-center gap-3">
+            <div className="pt-4 border-t border-gray-100 flex items-center gap-3">
               {isEditing ? (
                 <>
                   <button 
                     type="submit" 
                     disabled={loading}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl text-sm font-bold cursor-pointer border-none hover:bg-blue-500 transition-colors disabled:opacity-50 shadow-lg shadow-blue-600/20"
+                    className="flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-2xl text-sm font-bold cursor-pointer border-none hover:bg-black transition-colors disabled:opacity-50"
                   >
                     {loading ? (
                       <>
@@ -295,7 +331,7 @@ const Profile = () => {
                   <button 
                     type="button" 
                     onClick={handleCancel}
-                    className="flex items-center gap-2 bg-slate-800 border border-slate-700 text-slate-300 px-6 py-3 rounded-2xl text-sm font-bold cursor-pointer hover:bg-slate-700 transition-colors"
+                    className="flex items-center gap-2 bg-gray-100 border border-gray-200 text-gray-600 px-6 py-3 rounded-2xl text-sm font-bold cursor-pointer hover:bg-gray-200 transition-colors"
                   >
                     <X size={15} /> Cancel
                   </button>
@@ -304,9 +340,9 @@ const Profile = () => {
                 <button 
                   type="button" 
                   onClick={() => { setIsEditing(true); dispatch(clearAuthStatus()); }}
-                  className="flex items-center gap-2 text-sm text-blue-400 font-bold hover:text-white hover:bg-blue-600 transition-all cursor-pointer bg-blue-500/10 border border-blue-500/20 px-6 py-3 rounded-2xl"
+                  className="flex items-center gap-2 text-sm text-gray-900 font-bold hover:text-white hover:bg-gray-900 transition-all cursor-pointer bg-gray-50 border border-gray-200 px-6 py-3 rounded-2xl"
                 >
-                  <Edit3 size={15} /> Edit Info
+                  <Edit3 size={15} /> Edit Profile
                 </button>
               )}
             </div>
@@ -314,6 +350,14 @@ const Profile = () => {
 
         </div>
       </div>
+      <DialogBox 
+        open={dialog.open}
+        onClose={closeDialog}
+        type={dialog.type}
+        title={dialog.title}
+        message={dialog.message}
+        onConfirm={dialog.onConfirm}
+      />
     </div>
   );
 };

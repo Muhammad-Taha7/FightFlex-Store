@@ -81,7 +81,7 @@ const Login = () => {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter username"
               required
-              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-semibold"
+              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:border-gray-800 focus:ring-2 focus:ring-gray-800/20 font-semibold"
             />
           </div>
 
@@ -98,7 +98,7 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-semibold"
+              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-5 py-4 text-sm text-white placeholder-slate-500 outline-none transition-all duration-200 focus:border-gray-800 focus:ring-2 focus:ring-gray-800/20 font-semibold"
             />
           </div>
 
@@ -106,7 +106,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-blue-600 py-4 text-sm font-bold text-white transition-all duration-200 hover:bg-blue-500 disabled:opacity-50 shadow-lg shadow-blue-600/20"
+            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gray-900 py-4 text-sm font-bold text-white transition-all duration-200 hover:bg-gray-800 disabled:opacity-50 shadow-lg shadow-gray-900/20"
           >
             {loading ? (
               <>

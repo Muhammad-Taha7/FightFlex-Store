@@ -116,7 +116,7 @@ const CarouselManagement = () => {
       {/* Header Banner */}
       <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-blue-600/10 text-blue-400 rounded-2xl border border-blue-500/20">
+          <div className="p-3 bg-gray-900/10 text-gray-400 rounded-2xl border border-gray-800/20">
             <Image className="w-6 h-6" />
           </div>
           <div>
@@ -133,7 +133,7 @@ const CarouselManagement = () => {
       {/* Upload Form */}
       <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
         <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-          <Plus className="w-5 h-5 text-blue-500" />
+          <Plus className="w-5 h-5 text-gray-800" />
           <span>Add New Banner</span>
         </h3>
 
@@ -144,7 +144,7 @@ const CarouselManagement = () => {
             <div
               className={`w-full h-52 border-2 border-dashed rounded-2xl overflow-hidden flex flex-col items-center justify-center cursor-pointer transition-all ${
                 preview
-                  ? 'border-blue-500/50 bg-slate-950'
+                  ? 'border-gray-800/50 bg-slate-950'
                   : 'border-slate-800 hover:border-slate-700 bg-slate-950/60 hover:bg-slate-950'
               }`}
               onClick={() => fileInputRef.current?.click()}
@@ -183,7 +183,7 @@ const CarouselManagement = () => {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800 transition"
                   placeholder="e.g. Summer Sale 50% Off"
                 />
               </div>
@@ -196,7 +196,7 @@ const CarouselManagement = () => {
                   type="number"
                   value={order}
                   onChange={(e) => setOrder(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800 transition"
                 />
               </div>
 
@@ -215,7 +215,7 @@ const CarouselManagement = () => {
             <button
               type="submit"
               disabled={uploading || !preview}
-              className="w-full py-3.5 bg-blue-600 text-white font-bold rounded-xl flex justify-center items-center gap-2 hover:bg-blue-500 transition duration-200 cursor-pointer shadow-lg shadow-blue-600/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+              className="w-full py-3.5 bg-gray-900 text-white font-bold rounded-xl flex justify-center items-center gap-2 hover:bg-gray-800 transition duration-200 cursor-pointer shadow-lg shadow-gray-900/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
             >
               {uploading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -231,13 +231,13 @@ const CarouselManagement = () => {
       {/* List Section */}
       <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl p-6">
         <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-          <Layers className="w-5 h-5 text-blue-500" />
+          <Layers className="w-5 h-5 text-gray-800" />
           <span>Active Carousel Banners</span>
         </h3>
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-gray-800" />
           </div>
         ) : carousels.length === 0 ? (
           <div className="text-center py-12 text-slate-500">

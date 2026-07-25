@@ -241,7 +241,7 @@ const ProductManagement = () => {
     });
 
     const categoryColors = {
-        Men: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+        Men: 'bg-gray-800/10 text-gray-400 border border-gray-800/20',
         Women: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
         Kids: 'bg-sky-500/10 text-sky-400 border border-sky-500/20',
         Accessories: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
@@ -258,7 +258,7 @@ const ProductManagement = () => {
                 </div>
                 <button
                     onClick={() => { setEditingProduct(null); setForm(initialForm); setError(''); setShowForm(true); }}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 shadow-lg shadow-blue-600/20 transition-all"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 shadow-lg shadow-gray-900/20 transition-all"
                 >
                     <Plus className="w-5 h-5" /> Add Product
                 </button>
@@ -286,7 +286,7 @@ const ProductManagement = () => {
                         placeholder="Search products..."
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 text-white placeholder-slate-500 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                        className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 text-white placeholder-slate-500 rounded-xl text-sm outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800 transition-all"
                     />
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -294,7 +294,7 @@ const ProductManagement = () => {
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${activeCategory === cat ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'}`}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${activeCategory === cat ? 'bg-gray-900 text-white shadow-md shadow-gray-900/20' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'}`}
                         >
                             {cat}
                         </button>
@@ -305,7 +305,7 @@ const ProductManagement = () => {
             {/* Products Grid */}
             {loading ? (
                 <div className="flex justify-center py-16 bg-slate-900 rounded-2xl border border-slate-800">
-                    <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+                    <Loader2 className="w-10 h-10 animate-spin text-gray-800" />
                 </div>
             ) : filteredProducts.length === 0 ? (
                 <div className="bg-slate-900 rounded-2xl border border-slate-800 p-12 text-center">
@@ -352,7 +352,7 @@ const ProductManagement = () => {
                                     <h3 className="font-bold text-white truncate">{product.title}</h3>
                                     <p className="text-xs text-slate-400 mt-1 line-clamp-2">{product.description}</p>
                                     <div className="flex items-center justify-between mt-3">
-                                        <span className="text-lg font-black text-blue-400">PKR {Number(product.price).toLocaleString()}</span>
+                                        <span className="text-lg font-black text-gray-400">PKR {Number(product.price).toLocaleString()}</span>
                                         <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${product.stockQuantity > 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
                                             {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : 'Out of stock'}
                                         </span>
@@ -448,7 +448,7 @@ const ProductManagement = () => {
                                         <button
                                             type="button"
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="w-24 h-24 border-2 border-dashed border-slate-700 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:border-blue-500 hover:text-blue-400 bg-slate-950/50 transition"
+                                            className="w-24 h-24 border-2 border-dashed border-slate-700 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:border-gray-800 hover:text-gray-400 bg-slate-950/50 transition"
                                         >
                                             <Upload className="w-5 h-5 mb-1" />
                                             <span className="text-xs font-medium">Add</span>
@@ -472,7 +472,7 @@ const ProductManagement = () => {
                                     <input
                                         value={form.title} 
                                         onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                                        className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                                        className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800 transition"
                                         placeholder="e.g. FightFlex Pro Gloves"
                                     />
                                 </div>
@@ -484,7 +484,7 @@ const ProductManagement = () => {
                                             type="number" 
                                             value={form.price} 
                                             onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
-                                            className="w-full pl-14 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                                            className="w-full pl-14 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800 transition"
                                             placeholder="0"
                                         />
                                     </div>
@@ -498,7 +498,7 @@ const ProductManagement = () => {
                                     <select
                                         value={form.category} 
                                         onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                                        className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                                        className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800 transition"
                                     >
                                         {CATEGORIES.filter(c => c !== 'All').map(cat => (
                                             <option key={cat} value={cat} className="bg-slate-900 text-white">{cat}</option>
@@ -511,7 +511,7 @@ const ProductManagement = () => {
                                         type="number" 
                                         value={form.stockQuantity} 
                                         onChange={e => setForm(f => ({ ...f, stockQuantity: e.target.value }))}
-                                        className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                                        className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800 transition"
                                         placeholder="0"
                                     />
                                 </div>
@@ -524,7 +524,7 @@ const ProductManagement = () => {
                                     value={form.description} 
                                     onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                                     rows={4}
-                                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none transition"
+                                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 outline-none focus:border-gray-800 focus:ring-1 focus:ring-gray-800 resize-none transition"
                                     placeholder="Describe the product in detail..."
                                 />
                             </div>
@@ -541,7 +541,7 @@ const ProductManagement = () => {
                                             type="button" 
                                             onClick={() => toggleSize(size)}
                                             className={`px-4 py-1.5 rounded-xl text-sm font-bold border transition-all ${
-                                                form.sizes.includes(size) ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+                                                form.sizes.includes(size) ? 'bg-gray-900 text-white border-gray-900 shadow-md shadow-gray-900/20' : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
                                             }`}
                                         >
                                             {size}
@@ -564,7 +564,7 @@ const ProductManagement = () => {
                                                 type="button" 
                                                 onClick={() => toggleColor(color)}
                                                 className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                                                    isSelected ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+                                                    isSelected ? 'bg-gray-900 text-white border-gray-900 shadow-md shadow-gray-900/20' : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
                                                 }`}
                                             >
                                                 <span className="w-3.5 h-3.5 rounded-full border border-slate-700 shadow-inner" style={{ backgroundColor: color.toLowerCase() }} />
@@ -587,7 +587,7 @@ const ProductManagement = () => {
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-500 shadow-lg shadow-blue-600/20 disabled:opacity-50 transition"
+                                    className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-800 shadow-lg shadow-gray-900/20 disabled:opacity-50 transition"
                                 >
                                     {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                                     {editingProduct ? 'Update Product' : 'Create Product'}

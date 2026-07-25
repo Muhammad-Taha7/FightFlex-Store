@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
 import { logoutUser } from '../../store/authSlice';
 import { 
   Search, 
@@ -13,13 +14,7 @@ import {
   LogOut, 
   UserCircle 
 } from 'lucide-react';
-
-// Demo products fallback if needed
-const DEMO_PRODUCTS = [
-  { id: 1, name: 'Pro Boxing Gloves', category: 'Gloves', price: 4500 },
-  { id: 2, name: 'MMA Fight Shorts', category: 'Men', price: 2800 },
-  { id: 3, name: 'Whey Protein Isolate', category: 'Nutrition', price: 8500 },
-];
+import CartDrawer from './CartDrawer';
 
 export const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -28,6 +23,7 @@ export const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   // Track scroll state
   const [isScrolled, setIsScrolled] = useState(false);
@@ -47,7 +43,7 @@ export const Navbar = () => {
   const cartItems = useSelector((state) => state.cart?.items || []);
   const cartItemCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
 
-  // Scroll event listener (handles window and body scroll)
+  // Scroll event listener
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
@@ -101,19 +97,35 @@ export const Navbar = () => {
     return () => document.removeEventListener('keydown', handleEsc);
   }, []);
 
-  // Filter products for search
+  // Fetch products dynamically for search
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setSearchResults([]);
-      return;
+    const fetchSearch = async () => {
+      setIsSearching(true);
+      try {
+        if (!searchQuery.trim()) {
+          // Fetch newest products as suggestions if search query is empty
+          const res = await axios.get(`http://localhost:5000/api/products`);
+          setSearchResults(res.data.products?.slice(0, 5) || []);
+        } else {
+          // Fetch actual search results
+          const res = await axios.get(`http://localhost:5000/api/products?search=${searchQuery}`);
+          setSearchResults(res.data.products || []);
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+    
+    // Only fetch if search overlay is open
+    if (searchOpen) {
+      const debounce = setTimeout(() => {
+        fetchSearch();
+      }, 300);
+      return () => clearTimeout(debounce);
     }
-    const q = searchQuery.toLowerCase();
-    setSearchResults(
-      DEMO_PRODUCTS.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
-      )
-    );
-  }, [searchQuery]);
+  }, [searchQuery, searchOpen]);
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
@@ -138,162 +150,105 @@ export const Navbar = () => {
 
   return (
     <>
-      {/* MAIN NAVBAR - Dynamic Backdrop Blur on Scroll */}
       <nav 
         style={{
-          backdropFilter: shouldBlur ? 'blur(12px)' : 'none',
-          WebkitBackdropFilter: shouldBlur ? 'blur(12px)' : 'none'
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)'
         }}
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          shouldBlur 
-            ? 'bg-slate-950/80 border-b border-white/10 shadow-lg py-0' 
-            : 'bg-transparent border-b border-transparent py-2'
+        className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
+          isScrolled
+            ? 'bg-white border-gray-200 shadow-sm py-0' 
+            : 'bg-white/90 border-transparent py-2'
         }`}
       >
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-
-            {/* Brand Logo */}
-            <Link to="/" className="text-2xl font-black tracking-wider uppercase flex-shrink-0 no-underline drop-shadow-md">
-              <span className="text-blue-500">Fight</span>
-              <span className="text-white">Flex</span>
+            <Link to="/" className="flex flex-col items-center justify-center leading-none">
+              <img src="https://i.postimg.cc/5yxd84ZJ/Fight-Flex2-removebg-preview.png" alt="FightFlex Logo" className="h-8 md:h-9 object-contain mb-0.5" style={{ filter: 'brightness(0)' }} />
+              <span className="font-black text-[0.65rem] md:text-[0.7rem] tracking-[0.15em] text-gray-900 font-mono uppercase">FIGHTFLEX</span>
             </Link>
 
-            {/* Desktop Nav Links */}
             <div className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.to;
                 return (
                   <Link
-                    key={link.to}
+                    key={link.label}
                     to={link.to}
-                    className={`transition-colors duration-200 font-semibold text-[0.925rem] tracking-tight no-underline relative py-1 drop-shadow ${
-                      isActive ? 'text-blue-400' : 'text-white hover:text-blue-400'
-                    }`}
+                    className={`font-semibold text-sm transition-colors ${isActive ? 'text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
                   >
                     {link.label}
-                    {isActive && (
-                      <span className="absolute bottom-0 left-0 w-full h-[2px] bg-blue-500 rounded-full" />
-                    )}
                   </Link>
                 );
               })}
             </div>
 
-            {/* Desktop Right Actions */}
-            <div className="hidden md:flex items-center gap-5">
-              {/* Search Toggle Button */}
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="text-white hover:text-blue-400 transition-colors duration-200 p-2 cursor-pointer bg-transparent border-none rounded-full hover:bg-white/10 drop-shadow"
-                aria-label="Open Search"
-              >
+            <div className="hidden md:flex items-center gap-4">
+              <button onClick={() => setSearchOpen(true)} className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
                 <Search size={20} />
               </button>
 
-              {/* User Dropdown / Login Button */}
               {isAuthenticated && user ? (
                 <div ref={dropdownRef} className="relative">
                   <button
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center gap-2 text-white p-1.5 rounded-full cursor-pointer hover:bg-white/10 transition-colors duration-200 border border-white/30 bg-transparent drop-shadow"
-                    aria-expanded={dropdownOpen}
+                    className="flex items-center gap-2 text-gray-700 hover:text-gray-900 font-semibold"
                   >
                     <img
                       src={userAvatar}
                       alt={user.username}
-                      className="w-7 h-7 rounded-full object-cover border border-white/50"
+                      className="w-8 h-8 rounded-full object-cover border border-gray-200"
                     />
-                    <span className="text-sm font-semibold max-w-[100px] truncate">{user.username}</span>
-                    <ChevronDown
-                      size={14}
-                      className={`transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
-                    />
+                    <ChevronDown size={14} className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {/* Dropdown Menu */}
-                  <div
-                    className={`absolute top-full right-0 mt-2 bg-slate-900 border border-white/10 rounded-2xl p-2 min-w-[190px] shadow-2xl transition-all duration-200 z-10 ${
-                      dropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
-                    }`}
-                  >
-                    <Link
-                      to="/profile"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2.5 text-gray-200 text-sm font-medium rounded-xl hover:bg-white/10 hover:text-white transition-colors duration-150 no-underline"
-                    >
-                      <UserCircle size={17} className="text-gray-400" /> My Profile
+                  <div className={`absolute top-full right-0 mt-2 bg-white border border-gray-100 rounded-2xl p-2 min-w-[190px] shadow-lg transition-all duration-200 z-10 ${dropdownOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+                    <Link to="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition-colors">
+                      <User size={16} /> Profile
                     </Link>
-                    <Link
-                      to="/orders"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2.5 text-gray-200 text-sm font-medium rounded-xl hover:bg-white/10 hover:text-white transition-colors duration-150 no-underline"
-                    >
-                      <Package size={17} className="text-gray-400" /> My Orders
+                    <Link to="/orders" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition-colors">
+                      <Package size={16} /> My Orders
                     </Link>
-                    <div className="h-px bg-white/10 my-1" />
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-2.5 px-3.5 py-2.5 text-red-400 text-sm font-semibold rounded-xl hover:bg-red-500/10 transition-colors duration-150 cursor-pointer w-full text-left bg-transparent border-none"
-                    >
-                      <LogOut size={17} /> Logout
+                    <div className="h-px bg-gray-100 my-1 mx-2"></div>
+                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl font-bold transition-colors">
+                      <LogOut size={16} /> Logout
                     </button>
                   </div>
                 </div>
               ) : (
-                <Link
-                  to="/client-login"
-                  className="flex items-center gap-1.5 text-white hover:text-blue-400 transition-colors duration-200 font-semibold no-underline py-1.5 px-3.5 rounded-full hover:bg-white/10 border border-white/30 bg-transparent drop-shadow"
-                >
-                  <User size={18} />
-                  <span className="text-sm">Login</span>
-                </Link>
+                <Link to="/client-login" className="text-sm font-bold text-gray-900 hover:text-gray-900">Login</Link>
               )}
 
-              {/* Cart Button */}
-              <button
-                onClick={() => setCartOpen(true)}
-                className="relative text-white hover:text-blue-400 transition-colors duration-200 p-2 cursor-pointer bg-transparent border-none rounded-full hover:bg-white/10 drop-shadow"
-                aria-label="Shopping Cart"
-              >
+              <button onClick={() => setCartOpen(true)} className="relative p-2 text-gray-600 hover:text-gray-900">
                 <ShoppingBag size={20} />
                 {cartItemCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-blue-600 text-white text-[0.65rem] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute top-0 right-0 bg-gray-900 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                     {cartItemCount}
                   </span>
                 )}
               </button>
             </div>
 
-            {/* Mobile Actions */}
-            <div className="flex md:hidden items-center gap-2">
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="text-white p-2 cursor-pointer bg-transparent border-none rounded-full hover:bg-white/10 drop-shadow"
-                aria-label="Search"
-              >
+            {/* FIXED: Yahan Mobile Menu, Search aur Cart buttons add kiye gaye hain */}
+            <div className="md:hidden flex items-center gap-1">
+              {/* Mobile Search Button */}
+              <button onClick={() => setSearchOpen(true)} className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
                 <Search size={22} />
               </button>
 
-              <button
-                onClick={() => setCartOpen(true)}
-                className="relative text-white p-2 cursor-pointer bg-transparent border-none rounded-full hover:bg-white/10 drop-shadow"
-                aria-label="Cart"
-              >
+              {/* Mobile Cart Button */}
+              <button onClick={() => setCartOpen(true)} className="relative p-2 text-gray-600 hover:text-gray-900">
                 <ShoppingBag size={22} />
                 {cartItemCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-blue-600 text-white text-[0.6rem] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute top-0 right-0 bg-gray-900 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                     {cartItemCount}
                   </span>
                 )}
               </button>
 
-              <button
-                onClick={() => setMobileOpen(!mobileOpen)}
-                className="text-white p-2 cursor-pointer bg-transparent border-none rounded-lg hover:bg-white/10 drop-shadow"
-                aria-label="Toggle Navigation Menu"
-              >
-                {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+              {/* Mobile Menu (Hamburger) Button */}
+              <button onClick={() => setMobileOpen(true)} className="p-2 text-gray-900 ml-1">
+                <Menu size={24} />
               </button>
             </div>
 
@@ -301,45 +256,30 @@ export const Navbar = () => {
         </div>
       </nav>
 
-      {/* MOBILE NAV DRAWER */}
-      <div
-        onClick={() => setMobileOpen(false)}
-        className={`fixed inset-0 z-[90] bg-black/50 transition-all duration-300 ${
+      {/* MOBILE MENU OVERLAY */}
+      <div 
+        className={`fixed inset-0 z-[100] bg-slate-950/95 flex flex-col transition-all duration-300 overflow-y-auto md:hidden ${
           mobileOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
         }`}
-      />
-
-      <div
-        className={`fixed top-0 left-0 bottom-0 w-full max-w-[300px] bg-slate-950 z-[95] md:hidden flex flex-col border-r border-white/10 shadow-2xl transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
       >
-        <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
-          <Link
-            to="/"
-            className="text-xl font-black tracking-wider uppercase no-underline flex items-center"
-            onClick={() => setMobileOpen(false)}
-          >
-            <span className="text-blue-500">Fight</span>
-            <span className="text-white">Flex</span>
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
+          <Link to="/" onClick={() => setMobileOpen(false)} className="flex items-center">
+            <img src="https://i.postimg.cc/5yxd84ZJ/Fight-Flex2-removebg-preview.png" alt="FightFlex" className="h-8 object-contain" style={{ filter: 'brightness(0)' }} />
           </Link>
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="bg-white/5 border border-white/10 text-gray-400 p-2 rounded-xl cursor-pointer hover:bg-white/10 hover:text-white transition-colors duration-200 flex items-center"
-          >
-            <X size={20} />
+          <button onClick={() => setMobileOpen(false)} className="p-2 text-gray-300 hover:text-white">
+            <X size={24} />
           </button>
         </div>
-
-        <div className="flex-1 overflow-y-auto py-5 px-6 space-y-2">
+        
+        <div className="flex-1 px-4 py-6 flex flex-col gap-2">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.to;
             return (
               <Link
-                key={link.to}
+                key={link.label}
                 to={link.to}
-                className={`block py-3 px-4 font-bold transition-colors text-[0.95rem] no-underline rounded-xl ${
-                  isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-gray-300 hover:text-white hover:bg-white/5'
+                className={`block px-4 py-3 rounded-xl font-bold transition-all ${
+                  isActive ? 'bg-gray-900/20 text-gray-400 border border-gray-800/30' : 'text-gray-300 hover:text-white hover:bg-white/5 border border-transparent'
                 }`}
                 onClick={() => setMobileOpen(false)}
               >
@@ -390,7 +330,7 @@ export const Navbar = () => {
           ) : (
             <Link
               to="/client-login"
-              className="flex items-center gap-3 py-3 px-4 text-blue-400 font-bold text-[0.95rem] no-underline rounded-xl hover:bg-blue-500/10 border border-blue-500/20"
+              className="flex items-center gap-3 py-3 px-4 text-gray-400 font-bold text-[0.95rem] no-underline rounded-xl hover:bg-gray-800/10 border border-gray-800/20"
               onClick={() => setMobileOpen(false)}
             >
               <User size={18} /> Login / Sign Up
@@ -424,7 +364,7 @@ export const Navbar = () => {
             </button>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 mb-5 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+          <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 mb-5 focus-within:border-gray-800 focus-within:ring-2 focus-within:ring-gray-800/20 transition-all">
             <Search size={20} className="text-gray-400 flex-shrink-0" />
             <input
               ref={searchInputRef}
@@ -448,12 +388,9 @@ export const Navbar = () => {
           </div>
 
           <div className="min-h-[200px]">
-            {searchQuery.trim() === '' ? (
+            {isSearching ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Search size={48} className="text-gray-600" />
-                <p className="text-gray-400 mt-4 text-[0.95rem] font-medium">
-                  Type to search across all products
-                </p>
+                <p className="text-gray-400 font-medium">Searching...</p>
               </div>
             ) : searchResults.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -463,12 +400,12 @@ export const Navbar = () => {
             ) : (
               <div className="flex flex-col gap-1">
                 <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2 px-1">
-                  {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found
+                  {searchQuery.trim() === '' ? 'New Arrivals Suggestions' : `${searchResults.length} result${searchResults.length !== 1 ? 's' : ''} found`}
                 </p>
                 {searchResults.map((product) => (
                   <button
                     key={product.id}
-                    className="flex items-center justify-between p-4 rounded-xl cursor-pointer bg-white/5 border border-white/10 text-left w-full hover:bg-blue-600/10 hover:border-blue-500/30 transition-all duration-150"
+                    className="flex items-center justify-between p-4 rounded-xl cursor-pointer bg-white/5 border border-white/10 text-left w-full hover:bg-gray-900/10 hover:border-gray-800/30 transition-all duration-150"
                     onClick={() => {
                       setSearchOpen(false);
                       setSearchQuery('');
@@ -479,7 +416,7 @@ export const Navbar = () => {
                       <p className="text-[0.95rem] font-bold text-white m-0">{product.name}</p>
                       <p className="text-xs text-gray-400 font-medium mt-0.5">{product.category}</p>
                     </div>
-                    <p className="text-sm font-extrabold text-blue-400 m-0 flex-shrink-0">
+                    <p className="text-sm font-extrabold text-gray-400 m-0 flex-shrink-0">
                       Rs. {product.price.toLocaleString()}
                     </p>
                   </button>
@@ -491,49 +428,7 @@ export const Navbar = () => {
       </div>
 
       {/* CART DRAWER */}
-      <div
-        onClick={() => setCartOpen(false)}
-        className={`fixed inset-0 z-[90] bg-black/50 transition-all duration-300 ${
-          cartOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-        }`}
-      />
-
-      <div
-        className={`fixed top-0 right-0 bottom-0 w-full max-w-[400px] bg-slate-950 z-[95] flex flex-col border-l border-white/10 shadow-2xl transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          cartOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
-          <h2 className="flex items-center gap-2.5 text-lg font-bold text-white m-0">
-            <ShoppingBag size={20} className="text-blue-500" /> Shopping Cart
-          </h2>
-          <button
-            onClick={() => setCartOpen(false)}
-            className="bg-transparent border-none text-gray-400 p-2 rounded-xl cursor-pointer hover:bg-white/10 hover:text-white transition-colors duration-200 flex items-center"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="flex-1 flex flex-col items-center justify-center px-8 py-10 text-center">
-          <div className="w-24 h-24 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6">
-            <ShoppingBag size={44} className="text-blue-400" />
-          </div>
-          <h3 className="text-xl font-bold text-white mb-2">Your cart is empty</h3>
-          <p className="text-sm text-gray-400 leading-relaxed mb-8 max-w-[260px]">
-            Looks like you haven't added anything yet. Start exploring our collection!
-          </p>
-          <button
-            onClick={() => {
-              setCartOpen(false);
-              navigate('/');
-            }}
-            className="bg-blue-600 text-white border-none px-8 py-3.5 rounded-xl text-sm font-bold cursor-pointer hover:bg-blue-500 transition-all duration-200 shadow-lg shadow-blue-600/30"
-          >
-            Start Shopping
-          </button>
-        </div>
-      </div>
+      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );
 };

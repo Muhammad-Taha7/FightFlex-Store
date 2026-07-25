@@ -58,7 +58,7 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-gray-50 via-gray-100/50 to-blue-50/20 flex items-center justify-center p-5">
+    <div className="min-h-screen bg-gradient-to-tr from-gray-50 via-gray-100/50 to-gray-50/20 flex items-center justify-center p-5">
       <SuccessModal 
         isOpen={showSuccess} 
         onClose={handleSuccessClose} 
@@ -69,7 +69,7 @@ const ForgotPasswordPage = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="text-3xl font-black tracking-wider text-gray-900 uppercase no-underline inline-block mb-2">
-            <span className="text-blue-600">Fight</span>Flex
+            <span className="text-gray-900">Fight</span>Flex
           </Link>
           <h2 className="text-xl font-black text-gray-900">Reset Password</h2>
           <p className="text-gray-500 text-xs font-semibold tracking-widest uppercase mt-1">
@@ -107,14 +107,14 @@ const ForgotPasswordPage = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-100 font-semibold"
+                  className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-gray-900 focus:bg-white focus:ring-2 focus:ring-gray-100 font-semibold"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:bg-blue-700 disabled:opacity-50 cursor-pointer border-none shadow-md shadow-blue-600/20">
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:bg-black disabled:opacity-50 cursor-pointer border-none shadow-md shadow-gray-900/20">
                 {loading ? (
                   <>
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -141,7 +141,7 @@ const ForgotPasswordPage = () => {
                   placeholder="Enter OTP"
                   required
                   maxLength={6}
-                  className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-center text-2xl tracking-[0.5em] text-blue-600 placeholder-gray-300 outline-none transition-all duration-200 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-100 font-black"
+                  className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-center text-2xl tracking-[0.5em] text-gray-900 placeholder-gray-300 outline-none transition-all duration-200 focus:border-gray-900 focus:bg-white focus:ring-2 focus:ring-gray-100 font-black"
                 />
               </div>
 
@@ -156,7 +156,7 @@ const ForgotPasswordPage = () => {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-100 font-semibold"
+                  className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-gray-900 focus:bg-white focus:ring-2 focus:ring-gray-100 font-semibold"
                 />
               </div>
 
@@ -171,14 +171,14 @@ const ForgotPasswordPage = () => {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-100 font-semibold"
+                  className="w-full rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-gray-900 focus:bg-white focus:ring-2 focus:ring-gray-100 font-semibold"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:bg-blue-700 disabled:opacity-50 cursor-pointer border-none shadow-md shadow-blue-600/20">
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:bg-black disabled:opacity-50 cursor-pointer border-none shadow-md shadow-gray-900/20">
                 {loading ? (
                   <>
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -196,7 +196,7 @@ const ForgotPasswordPage = () => {
 
           <p className="text-center text-gray-500 text-sm mt-8 pt-6 border-t border-gray-100 font-medium">
             Remembered your password?{' '}
-            <Link to="/client-login" className="text-blue-600 font-bold hover:text-blue-700 no-underline transition-colors">
+            <Link to="/client-login" className="text-gray-900 font-bold hover:text-black no-underline transition-colors">
               Sign In
             </Link>
           </p>

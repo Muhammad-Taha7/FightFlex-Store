@@ -1,7 +1,12 @@
-import React from 'react'
+import React from 'react';
+import ShopCategory from '../Components/ShopCategory';
 
 export const Men = () => {
   return (
-    <div >Men</div>
-  )
-}
+    <ShopCategory 
+      category="Men" 
+      title="Men's Collection" 
+      description="Elevate your performance with our premium fighting gear designed specifically for men."
+    />
+  );
+};
