@@ -12,23 +12,42 @@ export const setAuthToken = (token) => {
     }
 };
 
-const storedToken = localStorage.getItem('fightflex_token');
-const storedUser = localStorage.getItem('fightflex_user');
+// ── Safe localStorage helpers ──────────────────────────────
+const safeJsonParse = (value) => {
+    try {
+        if (!value || value === 'undefined' || value === 'null') return null;
+        return JSON.parse(value);
+    } catch {
+        return null;
+    }
+};
 
-if (storedToken) {
+const storedToken = localStorage.getItem('fightflex_token');
+const storedUser  = localStorage.getItem('fightflex_user');
+
+// Clear obviously stale/corrupt values
+if (storedToken === 'undefined' || storedToken === 'null') {
+    localStorage.removeItem('fightflex_token');
+}
+if (storedUser === 'undefined' || storedUser === 'null') {
+    localStorage.removeItem('fightflex_user');
+}
+
+if (storedToken && storedToken !== 'undefined') {
     setAuthToken(storedToken);
 }
 
 const initialState = {
-    token: storedToken || null,
-    user: storedUser ? JSON.parse(storedUser) : null,
-    isAuthenticated: !!storedToken,
+    token: (storedToken && storedToken !== 'undefined') ? storedToken : null,
+    user: safeJsonParse(storedUser),
+    isAuthenticated: !!(storedToken && storedToken !== 'undefined'),
     requiresOtp: false,
     otpEmail: null,
     loading: false,
     error: null,
     successMessage: null,
 };
+
 
 // Admin Login
 export const loginAdmin = createAsyncThunk(
