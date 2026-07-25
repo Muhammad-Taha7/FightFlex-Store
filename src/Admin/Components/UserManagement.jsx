@@ -70,7 +70,7 @@ const UserManagement = () => {
     const closeDialog = () => setDialog({ ...dialog, open: false });
 
     const { token, user: currentUser } = useSelector(state => state.auth);
-    const API_URL = 'http://localhost:5000/api/auth';
+    const API_URL = `${import.meta.env.VITE_API_URL}/api/auth`;
 
     const fetchUsers = async () => {
         try {

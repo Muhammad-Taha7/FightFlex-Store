@@ -39,7 +39,7 @@ export const Dashboard = () => {
             if (!token) return;
             try {
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-                const res = await axios.get('http://localhost:5000/api/orders/analytics', config);
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders/analytics`, config);
                 if (res.data.pendingOrders > 0) {
                     setHasNewOrder(true);
                     // Just to give them a nice list if there are pending orders

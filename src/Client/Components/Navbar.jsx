@@ -104,11 +104,11 @@ export const Navbar = () => {
       try {
         if (!searchQuery.trim()) {
           // Fetch newest products as suggestions if search query is empty
-          const res = await axios.get(`http://localhost:5000/api/products`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
           setSearchResults(res.data.products?.slice(0, 6) || []);
         } else {
           // Fetch actual search results
-          const res = await axios.get(`http://localhost:5000/api/products?search=${searchQuery}`);
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products?search=${searchQuery}`);
           setSearchResults(res.data.products || []);
         }
       } catch (error) {

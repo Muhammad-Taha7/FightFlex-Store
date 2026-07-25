@@ -29,7 +29,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products/${id}`);
         setProduct(res.data.product);
         if (res.data.product.images && res.data.product.images.length > 0) {
           setSelectedImage(res.data.product.images[0].imageUrl);

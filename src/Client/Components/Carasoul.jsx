@@ -12,7 +12,7 @@ export const Carousel = () => {
 
     const fetchCarouselImages = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/carousel", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/carousel`, {
           signal: controller.signal,
         });
         const data = await response.json();

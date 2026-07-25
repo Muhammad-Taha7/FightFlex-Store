@@ -15,7 +15,7 @@ const ShopCategory = ({ category, title, description }) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/products?category=${category}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/products?category=${category}`);
         setProducts(res.data.products || []);
       } catch (error) {
         console.error(`Error fetching ${category} products:`, error);

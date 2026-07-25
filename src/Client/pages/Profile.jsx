@@ -136,7 +136,7 @@ const Profile = () => {
       try {
         const token = localStorage.getItem('fightflex_token');
         const response = await axios.post(
-          'http://localhost:5000/api/auth/upload-avatar', 
+          `${import.meta.env.VITE_API_URL}/api/auth/upload-avatar`, 
           { image: base64Data },
           { headers: { Authorization: `Bearer ${token}` } }
         );

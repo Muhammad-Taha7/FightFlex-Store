@@ -64,7 +64,7 @@ const Checkout = () => {
         phone
       };
 
-      await axios.post('http://localhost:5000/api/orders', orderData, config);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/orders`, orderData, config);
       dispatch(clearCart());
       setSuccess(true);
     } catch (error) {

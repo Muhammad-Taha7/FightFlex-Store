@@ -14,7 +14,7 @@ const CarouselManagement = () => {
   const fileInputRef = useRef(null);
 
   const { token } = useSelector((state) => state.auth);
-  const API_URL = 'http://localhost:5000/api/carousel';
+  const API_URL = `${import.meta.env.VITE_API_URL}/api/carousel`;
 
   const [uploadError, setUploadError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState('');

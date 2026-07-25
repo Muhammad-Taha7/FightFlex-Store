@@ -36,7 +36,7 @@ const ProductManagement = () => {
     const fileInputRef = useRef(null);
 
     const { token } = useSelector(state => state.auth);
-    const API_URL = 'http://localhost:5000/api/products';
+    const API_URL = `${import.meta.env.VITE_API_URL}/api/products`;
 
     const fetchProducts = async () => {
         try {

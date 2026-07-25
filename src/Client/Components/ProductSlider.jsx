@@ -12,7 +12,7 @@ const ProductSlider = () => {
   const dragging  = useRef(false);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/products')
+    axios.get(`${import.meta.env.VITE_API_URL}/api/products`)
       .then(res => {
         const all = res.data.products || res.data || [];
         setProducts(all.slice(0, 5));

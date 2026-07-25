@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { setAuthToken } from './authSlice';
 
-const API_URL = 'http://localhost:5000/api/orders';
+const API_URL = `${import.meta.env.VITE_API_URL}/api/orders`;
 
 // Fetch user's orders
 export const fetchUserOrders = createAsyncThunk(

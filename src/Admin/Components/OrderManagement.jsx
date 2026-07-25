@@ -86,7 +86,7 @@ const OrderManagement = () => {
           },
           params: { filter }
         };
-        const res = await axios.get('http://localhost:5000/api/orders/all', config);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders/all`, config);
         setOrders(res.data.orders);
       } catch (error) {
         console.error('Error fetching admin orders:', error);
@@ -108,7 +108,7 @@ const OrderManagement = () => {
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`http://localhost:5000/api/orders/${orderId}/status`, { status: newStatus }, config);
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}/status`, { status: newStatus }, config);
       // Update local state
       setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
       showDialog('success', 'Status Updated', `Order has been marked as "${newStatus}" successfully.`);

@@ -59,7 +59,7 @@ const DashboardOverview = () => {
             try {
                 setError(null);
                 const config = { headers: { Authorization: `Bearer ${token}` } };
-                const res = await axios.get('http://localhost:5000/api/orders/analytics', config);
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders/analytics`, config);
                 if (isMounted) setAnalytics(res.data);
             } catch (err) {
                 if (isMounted) {
