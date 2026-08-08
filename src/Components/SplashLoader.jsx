@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 /**
  * FightFlex SplashLoader
- * - Exact 2.0s duration (1.5s hold + 0.5s split exit transition)
+ * - Exact 10.0s duration (9.5s hold + 0.5s split exit transition)
  * - Fully responsive for mobile and desktop screens
  */
 
@@ -11,14 +11,14 @@ const SplashLoader = ({ onFinish }) => {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    // 1.5 second hold -> trigger exit transition
-    const t1 = setTimeout(() => setExiting(true), 1500);
+    // 9.5 second hold -> trigger exit transition
+    const t1 = setTimeout(() => setExiting(true), 9500);
 
-    // Complete at exactly 2.0 seconds (2000ms)
+    // Complete at exactly 10.0 seconds (10000ms)
     const t2 = setTimeout(() => {
       setDone(true);
       onFinish?.();
-    }, 2000);
+    }, 3000);
 
     return () => { 
       clearTimeout(t1); 
@@ -206,7 +206,7 @@ const SplashLoader = ({ onFinish }) => {
               Train Hard. Fight Smart.
             </span>
 
-            {/* Progress Bar (Fills in ~1.2s to match 1.5s exit) */}
+            {/* Progress Bar (Fills smoothly over 9 seconds to sync with exit) */}
             <div style={{
               marginTop: '28px',
               width: 'clamp(140px, 40vw, 220px)',
@@ -220,7 +220,7 @@ const SplashLoader = ({ onFinish }) => {
                 height: '100%',
                 background: '#fff',
                 borderRadius: '999px',
-                animation: 'ff-bar 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both',
+                animation: 'ff-bar 9s linear 0.2s both',
               }} />
             </div>
 
